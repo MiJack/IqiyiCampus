@@ -1,13 +1,13 @@
-package cn.mijack.iqiyicampus.adpter;
+package cn.mijack.meme.adpter;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
-import cn.mijack.iqiyicampus.base.BaseFragment;
-import cn.mijack.iqiyicampus.fragment.AccountFragment;
-import cn.mijack.iqiyicampus.fragment.MemeSquareFragment;
-import cn.mijack.iqiyicampus.fragment.VideoSquareFragment;
+import cn.mijack.meme.base.BaseFragment;
+import cn.mijack.meme.fragment.AccountFragment;
+import cn.mijack.meme.fragment.MemeSquareFragment;
+import cn.mijack.meme.fragment.VideoSquareFragment;
 
 /**
  * @author Mr.Yuan

@@ -1,4 +1,4 @@
-package cn.mijack.iqiyicampus.base;
+package cn.mijack.meme.base;
 
 import android.arch.lifecycle.LifecycleRegistry;
 import android.arch.lifecycle.LifecycleRegistryOwner;

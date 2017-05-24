@@ -1,4 +1,4 @@
-package cn.mijack.iqiyicampus.ui;
+package cn.mijack.meme.ui;
 
 
 import android.content.Intent;
@@ -7,8 +7,8 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.view.View;
 
-import cn.mijack.iqiyicampus.R;
-import cn.mijack.iqiyicampus.base.BaseActivity;
+import cn.mijack.meme.R;
+import cn.mijack.meme.base.BaseActivity;
 
 /**
  * @author Mr.Yuan

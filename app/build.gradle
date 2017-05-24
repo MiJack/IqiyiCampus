@@ -4,7 +4,7 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
-        applicationId "cn.mijack.iqiyicampus"
+        applicationId "cn.mijack.meme"
         minSdkVersion 15
         targetSdkVersion 25
         versionCode 1
@@ -35,4 +35,6 @@ dependencies {
     annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha1"
     compile 'android.arch.persistence.room:runtime:1.0.0-alpha1'
     annotationProcessor "android.arch.persistence.room:compiler:1.0.0-alpha1"
+    compile 'com.facebook.stetho:stetho:1.5.0'
+    compile 'com.facebook.stetho:stetho-okhttp3:1.5.0'
 }

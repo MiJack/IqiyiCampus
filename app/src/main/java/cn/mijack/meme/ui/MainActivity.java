@@ -1,4 +1,4 @@
-package cn.mijack.iqiyicampus.ui;
+package cn.mijack.meme.ui;
 
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
@@ -6,9 +6,9 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 
-import cn.mijack.iqiyicampus.R;
-import cn.mijack.iqiyicampus.adpter.MainAdapter;
-import cn.mijack.iqiyicampus.base.BaseActivity;
+import cn.mijack.meme.R;
+import cn.mijack.meme.adpter.MainAdapter;
+import cn.mijack.meme.base.BaseActivity;
 
 public class MainActivity extends BaseActivity {
 

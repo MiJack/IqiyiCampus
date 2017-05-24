@@ -1,4 +1,4 @@
-package cn.mijack.iqiyicampus.base;
+package cn.mijack.meme.base;
 
 import android.arch.lifecycle.LifecycleFragment;
 import android.os.Bundle;
@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import cn.mijack.iqiyicampus.R;
+import cn.mijack.meme.R;
 
 /**
  * @author Mr.Yuan

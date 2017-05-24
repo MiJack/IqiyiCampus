@@ -1,6 +1,6 @@
-package cn.mijack.iqiyicampus.fragment;
+package cn.mijack.meme.fragment;
 
-import cn.mijack.iqiyicampus.base.BaseFragment;
+import cn.mijack.meme.base.BaseFragment;
 
 /**
  * @author Mr.Yuan
