@@ -1,6 +1,8 @@
 package cn.mijack.meme.remote;
 
 
+import com.facebook.stetho.okhttp3.StethoInterceptor;
+
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketException;
@@ -90,6 +92,7 @@ public class RetrofitClient {
         //拦截器:打印Log
         if (isDebug) {
             clientBuilder.addInterceptor(new LogInterceptor());
+            clientBuilder.addInterceptor(new StethoInterceptor());
         }
 
         //拦截器:重试请求
