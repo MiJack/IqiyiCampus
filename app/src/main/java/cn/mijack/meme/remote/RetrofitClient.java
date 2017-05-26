@@ -28,6 +28,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by zhouxiaming on 2017/5/5.
  */
 public class RetrofitClient {
+
+    public static String HOST = "http://iface.qiyi.com/";
+    public static String API_REALTIME_HOST = HOST + "openapi/realtime/";
+
     private String TAG = RetrofitClient.class.getSimpleName();
     private String host;
     private static final int RETRY_COUNT = 1;
@@ -41,7 +45,7 @@ public class RetrofitClient {
 
     public synchronized static RetrofitClient getInstance() {
         if (instance == null) {
-            instance = new RetrofitClient(ApiURL.API_REALTIME_HOST, LogUtils.isDebug, true, false);
+            instance = new RetrofitClient(API_REALTIME_HOST, LogUtils.isDebug, true, false);
         }
         return instance;
     }
