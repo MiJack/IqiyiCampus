@@ -90,4 +90,7 @@
 "For example, position the FAB to one side of stream of a cards so the FAB won’t interfere "
 "when a user tries to pick up one of cards.\n\n"
 </string>
+    <string name="play_count">播放量:%1$s</string>
+    <string name="sns_score">评分:%1$s</string>
+    <string name="network_error">网络异常</string>
 </resources>
