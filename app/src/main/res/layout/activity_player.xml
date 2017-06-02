@@ -12,34 +12,44 @@
 
     <TextView
         android:id="@+id/id_current_time"
-        android:layout_below="@id/id_videoview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/id_videoview"
         android:layout_marginLeft="14dp"
-        android:text="00:00:00"/>
+        android:text="00:00:00" />
 
     <TextView
         android:id="@+id/id_total_time"
-        android:layout_below="@id/id_videoview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:layout_below="@id/id_videoview"
         android:layout_marginRight="14dp"
-        android:text="02:22:00"/>
+        android:text="02:22:00" />
 
     <SeekBar
         android:id="@+id/id_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@id/id_current_time"
         android:max="100"
-        android:progress="0"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:progress="0" />
 
     <Button
         android:id="@+id/id_playPause"
-        android:layout_below="@id/id_progress"
-        android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Pause"/>
+        android:layout_below="@id/id_progress"
+        android:layout_centerHorizontal="true"
+        android:text="Pause" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/id_playPause"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:onClick="capture"
+        android:text="capture" />
 </RelativeLayout>

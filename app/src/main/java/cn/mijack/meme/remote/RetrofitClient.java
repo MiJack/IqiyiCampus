@@ -17,6 +17,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import cn.mijack.meme.remote.livedata.LiveDataCallAdapterFactory;
 import cn.mijack.meme.utils.LogUtils;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -73,6 +74,7 @@ public class RetrofitClient {
                 .baseUrl(host)
                 .client(httpclient)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addCallAdapterFactory(new LiveDataCallAdapterFactory())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
     }

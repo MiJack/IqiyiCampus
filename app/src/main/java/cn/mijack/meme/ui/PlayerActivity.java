@@ -1,24 +1,50 @@
 package cn.mijack.meme.ui;
 
 
+import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.hardware.display.DisplayManager;
+import android.media.Image;
+import android.media.ImageReader;
+import android.media.projection.MediaProjection;
+import android.media.projection.MediaProjectionManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
-
+import android.widget.Toast;
 
 import com.qiyi.video.playcore.ErrorCode;
 import com.qiyi.video.playcore.IQYPlayerHandlerCallBack;
 import com.qiyi.video.playcore.QiyiVideoView;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import cn.mijack.meme.BuildConfig;
 import cn.mijack.meme.R;
 import cn.mijack.meme.base.BaseActivity;
 import cn.mijack.meme.utils.LogUtils;
@@ -26,14 +52,18 @@ import cn.mijack.meme.utils.StringUtils;
 
 /**
  * Created by zhouxiaming on 2017/5/9.
+ * Changed by MiJack
  */
 
-public class PlayerActivity extends BaseActivity {
+public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImageAvailableListener*/ {
     private static final int PERMISSION_REQUEST_CODE = 7171;
     private static final String TAG = PlayerActivity.class.getSimpleName();
 
     private static final int HANDLER_MSG_UPDATE_PROGRESS = 1;
     private static final int HANDLER_DEPLAY_UPDATE_PROGRESS = 1000; // 1s
+    private static final int REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 1;
+    private static final int REQUEST_MEDIA_PROJECTION = 2;
+    private static final int REQUEST_CODE_CHANGE_PERMISSION = 3;
 
     private QiyiVideoView mVideoView;
     private SeekBar mSeekBar;
@@ -47,6 +77,8 @@ public class PlayerActivity extends BaseActivity {
          */
         @Override
         public void OnSeekSuccess(long l) {
+            //更新时间
+            renderTime();
             LogUtils.i(TAG, "OnSeekSuccess: " + l);
         }
 
@@ -81,43 +113,54 @@ public class PlayerActivity extends BaseActivity {
          */
         @Override
         public void OnPlayerStateChanged(int i) {
+            if (currentPosition != -1) {
+                mVideoView.seekTo(currentPosition);
+                currentPosition = -1;
+            }
             LogUtils.i(TAG, "OnPlayerStateChanged: " + i);
         }
     };
+    private String aid;
+    private String tid;
+    private int currentPosition = -1;
+    private MediaProjectionManager mMediaProjectionManager;
+    private MediaProjection mediaProjection;
+    private ImageReader mImageReader;
+    private String mImageName;
+    private Bitmap mBitmap;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_player);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        String aid = getIntent().getStringExtra("aid");
-        String tid = getIntent().getStringExtra("tid");
+        aid = getIntent().getStringExtra("aid");
+        tid = getIntent().getStringExtra("tid");
         if (StringUtils.isEmpty(tid)) {
             finish();
             return;
         }
+        mMediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+
+        setContentView(R.layout.activity_player);
         mVideoView = (QiyiVideoView) findViewById(R.id.id_videoview);
         //mVideoView.setPlayData("667737400");
         mVideoView.setPlayData(tid);
         //设置回调，监听播放器状态
         setPlayerCallback();
+//        mVideoView.OnSeekSuccess();
 
         mCurrentTime = (TextView) findViewById(R.id.id_current_time);
         mTotalTime = (TextView) findViewById(R.id.id_total_time);
 
         mPlayPauseBtn = (Button) findViewById(R.id.id_playPause);
-        mPlayPauseBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mVideoView.isPlaying()) {
-                    mVideoView.pause();
-                    mPlayPauseBtn.setText("Play");
-                    mMainHandler.removeMessages(HANDLER_MSG_UPDATE_PROGRESS);
-                } else {
-                    mVideoView.start();
-                    mPlayPauseBtn.setText("Pause");
-                    mMainHandler.sendEmptyMessageDelayed(HANDLER_MSG_UPDATE_PROGRESS, HANDLER_DEPLAY_UPDATE_PROGRESS);
-                }
+        mPlayPauseBtn.setOnClickListener(view -> {
+            if (mVideoView.isPlaying()) {
+                mVideoView.pause();
+                mPlayPauseBtn.setText("Play");
+                mMainHandler.removeMessages(HANDLER_MSG_UPDATE_PROGRESS);
+            } else {
+                mVideoView.start();
+                mPlayPauseBtn.setText("Pause");
+                mMainHandler.sendEmptyMessageDelayed(HANDLER_MSG_UPDATE_PROGRESS, HANDLER_DEPLAY_UPDATE_PROGRESS);
             }
         });
 
@@ -128,7 +171,7 @@ public class PlayerActivity extends BaseActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 LogUtils.d(TAG, "onProgressChanged, progress = " + progress + ", fromUser = " + fromUser);
-                if(fromUser) {
+                if (fromUser) {
                     mProgress = progress;
                 }
             }
@@ -149,7 +192,6 @@ public class PlayerActivity extends BaseActivity {
     private void setPlayerCallback() {
         mVideoView.setPlayerCallBack(mCallBack);
     }
-
 
     @Override
     protected void onStart() {
@@ -187,16 +229,7 @@ public class PlayerActivity extends BaseActivity {
             LogUtils.d(TAG, "handleMessage, msg.what = " + msg.what);
             switch (msg.what) {
                 case HANDLER_MSG_UPDATE_PROGRESS:
-                    int duration = mVideoView.getDuration();
-                    int progress = mVideoView.getCurrentPosition();
-                    LogUtils.d(TAG, "HANDLER_MSG_UPDATE_PROGRESS, duration = " + duration + ", currentPosition = " + progress);
-                    if (duration > 0) {
-                        mSeekBar.setMax(duration);
-                        mSeekBar.setProgress(progress);
-
-                        mTotalTime.setText(ms2hms(duration));
-                        mCurrentTime.setText(ms2hms(progress));
-                    }
+                    renderTime();
                     mMainHandler.sendEmptyMessageDelayed(HANDLER_MSG_UPDATE_PROGRESS, HANDLER_DEPLAY_UPDATE_PROGRESS);
                     break;
                 default:
@@ -204,6 +237,19 @@ public class PlayerActivity extends BaseActivity {
             }
         }
     };
+
+    private void renderTime() {
+        int duration = mVideoView.getDuration();
+        int progress = mVideoView.getCurrentPosition();
+        LogUtils.d(TAG, "HANDLER_MSG_UPDATE_PROGRESS, duration = " + duration + ", currentPosition = " + progress);
+        if (duration > 0) {
+            mSeekBar.setMax(duration);
+            mSeekBar.setProgress(progress);
+
+            mTotalTime.setText(ms2hms(duration));
+            mCurrentTime.setText(ms2hms(progress));
+        }
+    }
 
     /**
      * Convert ms to hh:mm:ss
@@ -217,4 +263,144 @@ public class PlayerActivity extends BaseActivity {
                 TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
         return result;
     }
+
+    public void capture(View view) {
+        //请求读取权限
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                new AlertDialog.Builder(this).setTitle("请求权限")
+                        .setTitle("截图保持在SD卡中，需要存储权限，请前往设置打开权限重试")
+                        .setCancelable(false)
+                        .setPositiveButton("确定", (dialog, which) -> {
+                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
+                            intent.setData(uri);
+                            startActivityForResult(intent, REQUEST_CODE_CHANGE_PERMISSION);
+                            dialog.dismiss();
+                        })
+                        .setNegativeButton("取消", (dialog, which) -> Toast.makeText(PlayerActivity.this, "权限请求失败，无法截图", Toast.LENGTH_SHORT).show()).create().show();
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
+            }
+        } else {
+            captureImage();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_CODE_CHANGE_PERMISSION) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                captureImage();
+            } else {
+                new AlertDialog.Builder(this).setTitle("请求权限")
+                        .setTitle("截图保持在SD卡中，需要存储权限，请前往设置打开权限重试")
+                        .setCancelable(false)
+                        .setPositiveButton("确定", (dialog, which) -> {
+                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
+                            intent.setData(uri);
+                            startActivityForResult(intent, REQUEST_CODE_CHANGE_PERMISSION);
+                            dialog.dismiss();
+                        })
+                        .setNegativeButton("取消", (dialog, which) -> Toast.makeText(PlayerActivity.this, "权限请求失败，无法截图", Toast.LENGTH_SHORT).show()).create().show();
+            }
+        }
+    }
+
+    private void captureImage() {
+        if (mImageReader == null) {
+            startActivityForResult(mMediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
+        } else {
+            handlerImage(mImageReader.acquireLatestImage());
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_MEDIA_PROJECTION) {
+            if (resultCode == RESULT_CANCELED) {
+                Toast.makeText(this, "授权失败", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            DisplayMetrics metric = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metric);
+            int width = metric.widthPixels;
+            int height = metric.heightPixels;
+            int dpi = metric.densityDpi;
+            mediaProjection =
+                    mMediaProjectionManager.getMediaProjection(resultCode, data);
+            mImageReader = ImageReader.newInstance(width, height, 0x1, 2);
+            mediaProjection.createVirtualDisplay("ScreenShout",
+                    width, height, dpi,
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                    mImageReader.getSurface(), null, null);
+//            mImageReader.setOnImageAvailableListener(this, null);
+            new Handler().postDelayed(() -> handlerImage(mImageReader.acquireLatestImage()), 50);
+        }
+    }
+
+    private void handlerImage(Image image) {
+        if (image == null) {
+            new Handler().postDelayed(() -> handlerImage(mImageReader.acquireLatestImage()), 50);
+        }
+        DisplayMetrics metric = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metric);
+        int width = metric.widthPixels;
+        int height = metric.heightPixels;
+        final Image.Plane[] planes = image.getPlanes();
+        final ByteBuffer buffer = planes[0].getBuffer();
+        int pixelStride = planes[0].getPixelStride();
+        int rowStride = planes[0].getRowStride();
+        int rowPadding = rowStride - pixelStride * width;
+        mBitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
+        mBitmap.copyPixelsFromBuffer(buffer);
+        Bitmap bitmap = Bitmap.createBitmap(mVideoView.getWidth(), mVideoView.getHeight(), Bitmap.Config.ARGB_8888);
+        int[] location = new int[2];
+        mVideoView.getLocationOnScreen(location);
+        int left = location[0];
+        int top = location[1];
+        System.out.println("left:" + location[0] + " top:" + location[1]);
+        for (int i = 0; i < mVideoView.getWidth(); i++) {
+            for (int j = 0; j < mVideoView.getHeight(); j++) {
+                bitmap.setPixel(i, j, mBitmap.getPixel(left + i, top + j));
+            }
+        }
+        saveBitmapFile(bitmap);
+        image.close();
+    }
+
+    private void saveBitmapFile(Bitmap bitmap) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        String filePath = getExternalFilesDir(null).getAbsolutePath() + "/screenshots/" + "myscreen_" + dateFormat.format(new Date(System.currentTimeMillis())) + ".png";
+        // write bitmap to a file
+        File file = new File(filePath);
+        FileOutputStream fos = null;
+        try {
+            File parentFile = file.getParentFile();
+            parentFile.mkdirs();
+            file.createNewFile();
+            fos = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            System.out.println("insertImage:" + filePath);
+            Log.e(TAG, "captured image: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        try {
+            MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(), file.getName(), null);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+    }
+
 }

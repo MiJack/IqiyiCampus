@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <!--判断网络连接状态需要-->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:name=".MemeApplication"
         android:allowBackup="true"
@@ -27,6 +29,14 @@
         </activity>
         <activity android:name=".ui.MainActivity"></activity>
         <activity android:name=".ui.PlayerActivity"></activity>
+        <activity android:name=".CaptureActivity">
+           <!-- <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>-->
+
+        </activity>
     </application>
 
 </manifest>
