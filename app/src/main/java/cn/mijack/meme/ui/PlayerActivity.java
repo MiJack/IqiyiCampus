@@ -4,7 +4,9 @@ package cn.mijack.meme.ui;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
 import android.media.Image;
@@ -26,6 +28,8 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,6 +53,7 @@ import cn.mijack.meme.R;
 import cn.mijack.meme.base.BaseActivity;
 import cn.mijack.meme.utils.LogUtils;
 import cn.mijack.meme.utils.StringUtils;
+import cn.mijack.meme.utils.Utils;
 
 /**
  * Created by zhouxiaming on 2017/5/9.
@@ -67,7 +72,6 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
 
     private QiyiVideoView mVideoView;
     private SeekBar mSeekBar;
-    private Button mPlayPauseBtn;
     private TextView mCurrentTime;
     private TextView mTotalTime;
 
@@ -77,9 +81,13 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
          */
         @Override
         public void OnSeekSuccess(long l) {
-            //更新时间
-            renderTime();
             LogUtils.i(TAG, "OnSeekSuccess: " + l);
+            //更新时间
+            if (Utils.isUiThread()) {
+                renderTime();
+            } else {
+                mMainHandler.sendEmptyMessage(HANDLER_MSG_UPDATE_PROGRESS);
+            }
         }
 
         /**
@@ -128,10 +136,14 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
     private ImageReader mImageReader;
     private String mImageName;
     private Bitmap mBitmap;
+    private ImageView mPlayPauseView;
+    private LinearLayout controlBack;
+    private ImageView mFullScreenView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
         aid = getIntent().getStringExtra("aid");
         tid = getIntent().getStringExtra("tid");
         if (StringUtils.isEmpty(tid)) {
@@ -150,16 +162,37 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
 
         mCurrentTime = (TextView) findViewById(R.id.id_current_time);
         mTotalTime = (TextView) findViewById(R.id.id_total_time);
-
-        mPlayPauseBtn = (Button) findViewById(R.id.id_playPause);
-        mPlayPauseBtn.setOnClickListener(view -> {
+        controlBack = (LinearLayout) findViewById(R.id.controlBack);
+        mFullScreenView = (ImageView) findViewById(R.id.id_full_screen);
+        mFullScreenView.setOnClickListener(v -> {
+            Log.d(TAG, "click:  mFullScreenView");
+            int requestedOrientation = getRequestedOrientation();
+            if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+                //横屏
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                mFullScreenView.setImageResource(R.drawable.ic_fullscreen_exit);
+            } else if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+                //竖屏
+                mFullScreenView.setImageResource(R.drawable.ic_fullscreen);
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            }
+        });
+        mVideoView.setOnClickListener(v -> {
+            if (controlBack.getVisibility() != View.VISIBLE) {
+                controlBack.setVisibility(View.VISIBLE);
+            } else {
+                controlBack.setVisibility(View.GONE);
+            }
+        });
+        mPlayPauseView = (ImageView) findViewById(R.id.idPlayPause);
+        mPlayPauseView.setOnClickListener(v -> {
             if (mVideoView.isPlaying()) {
                 mVideoView.pause();
-                mPlayPauseBtn.setText("Play");
+                mPlayPauseView.setImageResource(R.drawable.ic_play_arrow);
                 mMainHandler.removeMessages(HANDLER_MSG_UPDATE_PROGRESS);
             } else {
                 mVideoView.start();
-                mPlayPauseBtn.setText("Pause");
+                mPlayPauseView.setImageResource(R.drawable.ic_pause);
                 mMainHandler.sendEmptyMessageDelayed(HANDLER_MSG_UPDATE_PROGRESS, HANDLER_DEPLAY_UPDATE_PROGRESS);
             }
         });
@@ -403,4 +436,13 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
         sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            // TODO: 16/6/14 横屏相关操作
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            // TODO: 16/6/14 竖屏相关操作
+        }
+    }
 }
