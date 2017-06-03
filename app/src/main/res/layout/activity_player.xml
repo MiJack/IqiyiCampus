@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <!--the height 200 is reference value, normally the width and height should be 16:9-->
-    <com.qiyi.video.playcore.QiyiVideoView
+    <cn.mijack.meme.view.MemeVideoView
         android:id="@+id/id_videoview"
         android:layout_width="match_parent"
         android:layout_height="200dp"

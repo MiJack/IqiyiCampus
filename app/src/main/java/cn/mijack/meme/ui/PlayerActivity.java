@@ -40,7 +40,6 @@ import android.widget.Toast;
 
 import com.qiyi.video.playcore.ErrorCode;
 import com.qiyi.video.playcore.IQYPlayerHandlerCallBack;
-import com.qiyi.video.playcore.QiyiVideoView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -58,6 +57,7 @@ import cn.mijack.meme.base.BaseActivity;
 import cn.mijack.meme.utils.LogUtils;
 import cn.mijack.meme.utils.StringUtils;
 import cn.mijack.meme.utils.Utils;
+import cn.mijack.meme.view.MemeVideoView;
 
 /**
  * Created by zhouxiaming on 2017/5/9.
@@ -74,7 +74,7 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
     private static final int REQUEST_MEDIA_PROJECTION = 2;
     private static final int REQUEST_CODE_CHANGE_PERMISSION = 3;
 
-    private QiyiVideoView mVideoView;
+    private MemeVideoView mVideoView;
     private SeekBar mSeekBar;
     private TextView mCurrentTime;
     private TextView mTotalTime;
@@ -157,6 +157,7 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
             }
         }
     };
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -172,13 +173,13 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
                 true, rotationObserver);
 
         setContentView(R.layout.activity_player);
-        mVideoView = (QiyiVideoView) findViewById(R.id.id_videoview);
+        mVideoView = (MemeVideoView) findViewById(R.id.id_videoview);
         //mVideoView.setPlayData("667737400");
         mVideoView.setPlayData(tid);
         //设置回调，监听播放器状态
         setPlayerCallback();
 //        mVideoView.OnSeekSuccess();
-
+//mVideoView.set
         mCurrentTime = (TextView) findViewById(R.id.id_current_time);
         mTotalTime = (TextView) findViewById(R.id.id_total_time);
         controlBack = (LinearLayout) findViewById(R.id.controlBack);
@@ -196,7 +197,7 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
             } else {
                 //横屏
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                mFullScreenView.setImageResource(R.drawable.ic_fullscreen );
+                mFullScreenView.setImageResource(R.drawable.ic_fullscreen);
 //                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }
 //            int requestedOrientation = getRequestedOrientation();
@@ -274,6 +275,16 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
             mVideoView.pause();
         }
         mMainHandler.removeMessages(HANDLER_MSG_UPDATE_PROGRESS);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mIsLandscape) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            mFullScreenView.setImageResource(R.drawable.ic_fullscreen);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -469,47 +480,47 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
         sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
     }
 
-@Override
-public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
-        //设置全屏即隐藏状态栏
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        mIsLandscape = true;
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
+            //设置全屏即隐藏状态栏
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            mIsLandscape = true;
 
-        ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
-        mConstraintSet.clone(getBaseContext(), R.layout.activity_player); //
-        mConstraintSet.constrainWidth(R.id.id_videoview,0);
-        mConstraintSet.constrainHeight(R.id.id_videoview,0);
-        mConstraintSet.connect(R.id.id_videoview,ConstraintSet.LEFT,R.id.activity_main,ConstraintSet.LEFT);
-        mConstraintSet.connect(R.id.id_videoview,ConstraintSet.TOP,R.id.activity_main,ConstraintSet.TOP);
-        mConstraintSet.connect(R.id.id_videoview,ConstraintSet.RIGHT,R.id.activity_main,ConstraintSet.RIGHT);
-        mConstraintSet.connect(R.id.id_videoview,ConstraintSet.BOTTOM,R.id.activity_main,ConstraintSet.BOTTOM);
-        mConstraintLayout.setConstraintSet(mConstraintSet);
-        //横屏 视频充满全屏
+            ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
+            mConstraintSet.clone(getBaseContext(), R.layout.activity_player); //
+            mConstraintSet.constrainWidth(R.id.id_videoview, 0);
+            mConstraintSet.constrainHeight(R.id.id_videoview, 0);
+            mConstraintSet.connect(R.id.id_videoview, ConstraintSet.LEFT, R.id.activity_main, ConstraintSet.LEFT);
+            mConstraintSet.connect(R.id.id_videoview, ConstraintSet.TOP, R.id.activity_main, ConstraintSet.TOP);
+            mConstraintSet.connect(R.id.id_videoview, ConstraintSet.RIGHT, R.id.activity_main, ConstraintSet.RIGHT);
+            mConstraintSet.connect(R.id.id_videoview, ConstraintSet.BOTTOM, R.id.activity_main, ConstraintSet.BOTTOM);
+            mConstraintLayout.setConstraintSet(mConstraintSet);
+            //横屏 视频充满全屏
 //        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mFleader.getLayoutParams();
 //        layoutParams.height = LinearLayout.LayoutParams.MATCH_PARENT;
 //        layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
 //        mFleader.setLayoutParams(layoutParams);
 //        mWebView.setVisibility(View.GONE);
-    } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-        //恢复状态栏
-        WindowManager.LayoutParams attrs = getWindow().getAttributes();
-        attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow().setAttributes(attrs);
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        mIsLandscape = false;
-        ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
-        mConstraintSet.clone(getBaseContext(), R.layout.activity_player); // get constraints from layout
-        mConstraintLayout.setConstraintSet(mConstraintSet);
-        //竖屏 视频显示固定大小
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            //恢复状态栏
+            WindowManager.LayoutParams attrs = getWindow().getAttributes();
+            attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            getWindow().setAttributes(attrs);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+            mIsLandscape = false;
+            ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
+            mConstraintSet.clone(getBaseContext(), R.layout.activity_player); // get constraints from layout
+            mConstraintLayout.setConstraintSet(mConstraintSet);
+            //竖屏 视频显示固定大小
 //        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mFleader.getLayoutParams();
 //        layoutParams.height = ViewUtils.dip2px(activity, 208);
 //        layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
 //        mFleader.setLayoutParams(layoutParams);
 //        //显示图文内容
 //        mWebView.setVisibility(View.VISIBLE);
+        }
     }
-}
 }
