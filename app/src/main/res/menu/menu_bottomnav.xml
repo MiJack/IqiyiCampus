@@ -4,28 +4,28 @@
     <item
         android:id="@+id/m1"
         android:enabled="true"
-        android:icon="@drawable/ic_icon"
+        android:icon="@drawable/ic_home"
         android:title="推荐"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/m2"
         android:enabled="true"
-        android:icon="@drawable/ic_icon"
+        android:icon="@drawable/ic_channel"
         android:title="频道"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/m3"
         android:enabled="true"
-        android:icon="@drawable/ic_icon"
+        android:icon="@drawable/ic_emoji"
         android:title="Meme"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/m4"
         android:enabled="true"
-        android:icon="@drawable/ic_icon"
+        android:icon="@drawable/ic_account"
         android:title="账号"
         app:showAsAction="ifRoom" />
 </menu>

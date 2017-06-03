@@ -45,7 +45,7 @@ public class ChannelSquareFragment extends BaseFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         tabLayout = (TabLayout) getActivity().findViewById(R.id.tabLayout);
         viewPager = (ViewPager) view.findViewById(R.id.viewPager);
-        adapter = new ChannelFragmentAdapter(getFragmentManager());
+        adapter = new ChannelFragmentAdapter(getChildFragmentManager());
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
         channelSquareViewModel = ViewModelProviders.of(this).get(ChannelSquareViewModel.class);

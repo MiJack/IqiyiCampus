@@ -63,13 +63,14 @@ public class ChannelDetailFragment extends BaseFragment implements SwipeRefreshL
         channelId = args.getString(CHANNEL_ID, null);
         channelName = args.getString(CHANNEL_NAME, null);
         channelDescribe = args.getString(CHANNEL_DESCRIBE, null);
+        //修改成getParentFragment()
         channelDetailViewModel = ViewModelProviders.of(this).get(ChannelDetailViewModel.class);
         channelDetailViewModel.loadChannel(getActivity(), channelId, channelName)
                 .observe(this, observer);
         refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), RecommendAdapter.ROW_NUM);
-        // TODO: 2017/6/4  setSpanSizeLookup
+        // TODO: 2017/6/4  setSpanSizeLookup 更多加载
         recyclerView.setLayoutManager(layoutManager);
         channelDetailAdapter = new ChannelDetailAdapter();
         recyclerView.setAdapter(channelDetailAdapter);
