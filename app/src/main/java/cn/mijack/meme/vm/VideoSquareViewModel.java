@@ -1,11 +1,9 @@
-package cn.mijack.meme;
+package cn.mijack.meme.vm;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.support.annotation.UiThread;
-
-import java.util.Map;
 
 import cn.mijack.meme.model.RecommendEntity;
 import cn.mijack.meme.remote.ApiParamsGen;
@@ -17,15 +15,9 @@ import cn.mijack.meme.remote.RetrofitClient;
  * @author Mr.Yuan
  * @date 2017/6/3
  */
-public class VideoSquareFragmentViewModel extends ViewModel {
-    private static final int DEFAULT_PAGE_SIZE = 30;
-    private ApiService apiService;
-    private LiveData<ApiResponse<RecommendEntity>> recommendDetailData;
+public class VideoSquareViewModel extends MemeViewModel {
 
-    public VideoSquareFragmentViewModel() {
-        RetrofitClient client = RetrofitClient.getInstance();
-        apiService = client.createApi(ApiService.class);
-    }
+    private LiveData<ApiResponse<RecommendEntity>> recommendDetailData;
 
     @UiThread
     public LiveData<ApiResponse<RecommendEntity>> getRecommendDetail(Context context) {

@@ -19,11 +19,13 @@ import retrofit2.http.QueryMap;
 
 /**
  * Created by zhouxiaming on 2017/4/11.
+ *
  * @change by Yuan Yujie
  */
 public interface ApiService {
     /**
      * 获取频道列表接口
+     *
      * @param params
      * @return
      */
@@ -32,6 +34,7 @@ public interface ApiService {
 
     /**
      * 获取频道详情接口
+     *
      * @param params
      * @return
      */
@@ -40,6 +43,7 @@ public interface ApiService {
 
     /**
      * 获取推荐页数据接口
+     *
      * @param params
      * @return
      */
@@ -48,10 +52,30 @@ public interface ApiService {
 
     /**
      * 获取推荐页数据接口
+     *
      * @param params
      * @return
      */
     @GET("recommend")
     LiveData<ApiResponse<RecommendEntity>> recommendDetail(@QueryMap Map<String, String> params);
+
+    /**
+     * 获取频道列表接口
+     *
+     * @param params
+     * @return
+     */
+    @GET("channel")
+    LiveData<ApiResponse<ChannelEntity>> channelList(@QueryMap Map<String, String> params);
+
+
+    /**
+     * 获取频道详情接口
+     *
+     * @param params
+     * @return
+     */
+    @GET("channel")
+    LiveData<ApiResponse<ChannelDetailEntity>> channelDetail(@QueryMap Map<String, String> params);
 
 }

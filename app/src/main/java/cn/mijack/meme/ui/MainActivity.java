@@ -4,10 +4,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 
 import cn.mijack.meme.R;
 import cn.mijack.meme.base.BaseActivity;
@@ -27,6 +29,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private MemeSquareFragment memeSquareFragment;
     private AccountFragment accountFragment;
     private Fragment currentFragment;
+    private TabLayout tabLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +37,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         setContentView(R.layout.activity_main);
         appbar = (AppBarLayout) findViewById(R.id.appbar);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         setSupportActionBar(toolbar);
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
@@ -42,6 +46,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     }
 
     private void selectFragment(int fragmentId) {
+        tabLayout.setVisibility(fragmentId == R.id.m2 ? View.VISIBLE : View.GONE);
         FragmentTransaction transaction;
         switch (fragmentId) {
             case R.id.m1:
