@@ -38,6 +38,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.iqiyi.player.nativemediaplayer.MediaPlayerState;
 import com.qiyi.video.playcore.ErrorCode;
 import com.qiyi.video.playcore.IQYPlayerHandlerCallBack;
 
@@ -64,7 +65,7 @@ import cn.mijack.meme.view.MemeVideoView;
  * Changed by MiJack
  */
 
-public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImageAvailableListener*/ {
+public class PlayerActivity extends BaseActivity {
     private static final int PERMISSION_REQUEST_CODE = 7171;
     private static final String TAG = PlayerActivity.class.getSimpleName();
 
@@ -125,8 +126,13 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
          */
         @Override
         public void OnPlayerStateChanged(int i) {
-            if (currentPosition != -1) {
-                mVideoView.seekTo(currentPosition);
+            if (i == MediaPlayerState.MPS_Prepared) {
+                renderTime();
+            }
+            if (i == MediaPlayerState.MPS_MoviePlaying && currentPosition != -1) {
+                if (currentPosition < mVideoView.getDuration()) {
+                    mVideoView.seekTo(currentPosition);
+                }
                 currentPosition = -1;
             }
             LogUtils.i(TAG, "OnPlayerStateChanged: " + i);
@@ -145,9 +151,22 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
     private ImageView mFullScreenView;
     private ConstraintLayout mConstraintLayout;
     private boolean mIsLandscape;
-    //注册 Settings.System.ACCELEROMETER_ROTATION
+    private Handler mMainHandler = new Handler() {
 
-    private ContentObserver rotationObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void handleMessage(Message msg) {
+            LogUtils.d(TAG, "handleMessage, msg.what = " + msg.what);
+            switch (msg.what) {
+                case HANDLER_MSG_UPDATE_PROGRESS:
+                    renderTime();
+                    mMainHandler.sendEmptyMessageDelayed(HANDLER_MSG_UPDATE_PROGRESS, HANDLER_DEPLAY_UPDATE_PROGRESS);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+    private ContentObserver rotationObserver = new ContentObserver(mMainHandler) {
         @Override
         public void onChange(boolean selfChange) {
             if (selfChange) {
@@ -178,37 +197,24 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
         mVideoView.setPlayData(tid);
         //设置回调，监听播放器状态
         setPlayerCallback();
-//        mVideoView.OnSeekSuccess();
-//mVideoView.set
         mCurrentTime = (TextView) findViewById(R.id.id_current_time);
         mTotalTime = (TextView) findViewById(R.id.id_total_time);
         controlBack = (LinearLayout) findViewById(R.id.controlBack);
         mFullScreenView = (ImageView) findViewById(R.id.id_full_screen);
         mConstraintLayout = (ConstraintLayout) findViewById(R.id.activity_main);
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
-
+        setUpView();
         mFullScreenView.setOnClickListener(v -> {
             Log.d(TAG, "click:  mFullScreenView");
             if (mIsLandscape == false) {
                 //竖屏
                 mFullScreenView.setImageResource(R.drawable.ic_fullscreen_exit);
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-//                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
             } else {
                 //横屏
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                 mFullScreenView.setImageResource(R.drawable.ic_fullscreen);
-//                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }
-//            int requestedOrientation = getRequestedOrientation();
-//            int orientation = getResources().getConfiguration().orientation;
-//            if (requestedOrientation==ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
-//            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//            } else /*if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)*/ {
-//                //竖屏
-//                mFullScreenView.setImageResource(R.drawable.ic_fullscreen_exit);
-//                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-//            }
         });
         mVideoView.setOnClickListener(v -> {
             if (controlBack.getVisibility() != View.VISIBLE) {
@@ -259,6 +265,34 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
         mVideoView.setPlayerCallBack(mCallBack);
     }
 
+    public static final String CURRENT_POSITION = "currentPosition";
+    public static final String DURATION = "duration";
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        int currentPosition = mVideoView.getCurrentPosition();
+        outState.putInt(CURRENT_POSITION, currentPosition);
+        outState.putInt(DURATION,mVideoView.getDuration());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState.containsKey(CURRENT_POSITION)) {
+            currentPosition = savedInstanceState.getInt(CURRENT_POSITION);
+            int duration= savedInstanceState.getInt(DURATION);
+            int progress =currentPosition;
+            if (duration > 0) {
+                mSeekBar.setMax(duration);
+                mSeekBar.setProgress(progress);
+
+                mTotalTime.setText(ms2hms(duration));
+                mCurrentTime.setText(ms2hms(progress));
+            }
+        }
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -299,21 +333,7 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
     /**
      * Query and update the play progress every 1 second.
      */
-    private Handler mMainHandler = new Handler() {
 
-        @Override
-        public void handleMessage(Message msg) {
-            LogUtils.d(TAG, "handleMessage, msg.what = " + msg.what);
-            switch (msg.what) {
-                case HANDLER_MSG_UPDATE_PROGRESS:
-                    renderTime();
-                    mMainHandler.sendEmptyMessageDelayed(HANDLER_MSG_UPDATE_PROGRESS, HANDLER_DEPLAY_UPDATE_PROGRESS);
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
 
     private void renderTime() {
         int duration = mVideoView.getDuration();
@@ -389,6 +409,7 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
         if (mImageReader == null) {
             startActivityForResult(mMediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
         } else {
+//            mImageReader.close();
             handlerImage(mImageReader.acquireLatestImage());
         }
     }
@@ -407,7 +428,7 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
             int dpi = metric.densityDpi;
             mediaProjection =
                     mMediaProjectionManager.getMediaProjection(resultCode, data);
-            mImageReader = ImageReader.newInstance(width, height, 0x1, 2);
+            mImageReader = ImageReader.newInstance(width, height, 0x1, 20);
             mediaProjection.createVirtualDisplay("ScreenShout",
                     width, height, dpi,
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
@@ -421,30 +442,33 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
         if (image == null) {
             new Handler().postDelayed(() -> handlerImage(mImageReader.acquireLatestImage()), 50);
         }
-        DisplayMetrics metric = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(metric);
-        int width = metric.widthPixels;
-        int height = metric.heightPixels;
-        final Image.Plane[] planes = image.getPlanes();
-        final ByteBuffer buffer = planes[0].getBuffer();
-        int pixelStride = planes[0].getPixelStride();
-        int rowStride = planes[0].getRowStride();
-        int rowPadding = rowStride - pixelStride * width;
-        mBitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
-        mBitmap.copyPixelsFromBuffer(buffer);
-        Bitmap bitmap = Bitmap.createBitmap(mVideoView.getWidth(), mVideoView.getHeight(), Bitmap.Config.ARGB_8888);
-        int[] location = new int[2];
-        mVideoView.getLocationOnScreen(location);
-        int left = location[0];
-        int top = location[1];
-        System.out.println("left:" + location[0] + " top:" + location[1]);
-        for (int i = 0; i < mVideoView.getWidth(); i++) {
-            for (int j = 0; j < mVideoView.getHeight(); j++) {
-                bitmap.setPixel(i, j, mBitmap.getPixel(left + i, top + j));
+        new Thread(() -> {
+
+            DisplayMetrics metric = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metric);
+            int width = metric.widthPixels;
+            int height = metric.heightPixels;
+            final Image.Plane[] planes = image.getPlanes();
+            final ByteBuffer buffer = planes[0].getBuffer();
+            int pixelStride = planes[0].getPixelStride();
+            int rowStride = planes[0].getRowStride();
+            int rowPadding = rowStride - pixelStride * width;
+            mBitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
+            mBitmap.copyPixelsFromBuffer(buffer);
+            Bitmap bitmap = Bitmap.createBitmap(mVideoView.getWidth(), mVideoView.getHeight(), Bitmap.Config.ARGB_8888);
+            int[] location = new int[2];
+            mVideoView.getLocationOnScreen(location);
+            int left = location[0];
+            int top = location[1];
+            System.out.println("left:" + location[0] + " top:" + location[1]);
+            for (int i = 0; i < mVideoView.getWidth(); i++) {
+                for (int j = 0; j < mVideoView.getHeight(); j++) {
+                    bitmap.setPixel(i, j, mBitmap.getPixel(left + i, top + j));
+                }
             }
-        }
-        saveBitmapFile(bitmap);
-        image.close();
+            saveBitmapFile(bitmap);
+            image.close();
+        }).start();
     }
 
     private void saveBitmapFile(Bitmap bitmap) {
@@ -479,11 +503,56 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
         }
         sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
     }
+//
+//    @Override
+//    public void onConfigurationChanged(Configuration newConfig) {
+//        super.onConfigurationChanged(newConfig);
+//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
+//            //设置全屏即隐藏状态栏
+//            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//            mIsLandscape = true;
+//
+//            ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
+//            mConstraintSet.clone(getBaseContext(), R.layout.activity_player); //
+//            mConstraintSet.constrainWidth(R.id.id_videoview, 0);
+//            mConstraintSet.constrainHeight(R.id.id_videoview, 0);
+//            mConstraintSet.connect(R.id.id_videoview, ConstraintSet.LEFT, R.id.activity_main, ConstraintSet.LEFT);
+//            mConstraintSet.connect(R.id.id_videoview, ConstraintSet.TOP, R.id.activity_main, ConstraintSet.TOP);
+//            mConstraintSet.connect(R.id.id_videoview, ConstraintSet.RIGHT, R.id.activity_main, ConstraintSet.RIGHT);
+//            mConstraintSet.connect(R.id.id_videoview, ConstraintSet.BOTTOM, R.id.activity_main, ConstraintSet.BOTTOM);
+//            mConstraintLayout.setConstraintSet(mConstraintSet);
+//            mVideoView.release();
+////            mVideoView
+//            //横屏 视频充满全屏
+////        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mFleader.getLayoutParams();
+////        layoutParams.height = LinearLayout.LayoutParams.MATCH_PARENT;
+////        layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
+////        mFleader.setLayoutParams(layoutParams);
+////        mWebView.setVisibility(View.GONE);
+//        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+//            //恢复状态栏
+//            WindowManager.LayoutParams attrs = getWindow().getAttributes();
+//            attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//            getWindow().setAttributes(attrs);
+//            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+//            mIsLandscape = false;
+//            ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
+//            mConstraintSet.clone(getBaseContext(), R.layout.activity_player); // get constraints from layout
+//            mConstraintLayout.setConstraintSet(mConstraintSet);
+//            //竖屏 视频显示固定大小
+////        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mFleader.getLayoutParams();
+////        layoutParams.height = ViewUtils.dip2px(activity, 208);
+////        layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
+////        mFleader.setLayoutParams(layoutParams);
+////        //显示图文内容
+////        mWebView.setVisibility(View.VISIBLE);
+//        }
+//    }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
+    private void setUpView() {
+        Configuration configuration = getResources().getConfiguration();
+        if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
             //设置全屏即隐藏状态栏
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -498,13 +567,14 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
             mConstraintSet.connect(R.id.id_videoview, ConstraintSet.RIGHT, R.id.activity_main, ConstraintSet.RIGHT);
             mConstraintSet.connect(R.id.id_videoview, ConstraintSet.BOTTOM, R.id.activity_main, ConstraintSet.BOTTOM);
             mConstraintLayout.setConstraintSet(mConstraintSet);
+            mVideoView.release();
             //横屏 视频充满全屏
 //        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mFleader.getLayoutParams();
 //        layoutParams.height = LinearLayout.LayoutParams.MATCH_PARENT;
 //        layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
 //        mFleader.setLayoutParams(layoutParams);
 //        mWebView.setVisibility(View.GONE);
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        } else if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             //恢复状态栏
             WindowManager.LayoutParams attrs = getWindow().getAttributes();
             attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -514,13 +584,7 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
             ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
             mConstraintSet.clone(getBaseContext(), R.layout.activity_player); // get constraints from layout
             mConstraintLayout.setConstraintSet(mConstraintSet);
-            //竖屏 视频显示固定大小
-//        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mFleader.getLayoutParams();
-//        layoutParams.height = ViewUtils.dip2px(activity, 208);
-//        layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
-//        mFleader.setLayoutParams(layoutParams);
-//        //显示图文内容
-//        mWebView.setVisibility(View.VISIBLE);
         }
     }
+
 }

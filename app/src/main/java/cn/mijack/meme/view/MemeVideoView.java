@@ -2,6 +2,7 @@ package cn.mijack.meme.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 
 import com.qiyi.video.playcore.QiyiVideoView;
 
@@ -26,4 +27,8 @@ public class MemeVideoView extends QiyiVideoView {
         System.out.println("vars:" + var1 + "-" + var2 + "-" + var3 + "-" + var4);
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return super.onTouchEvent(event);
+    }
 }
