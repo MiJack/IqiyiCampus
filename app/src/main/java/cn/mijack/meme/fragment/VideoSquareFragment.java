@@ -1,37 +1,50 @@
 package cn.mijack.meme.fragment;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import cn.mijack.meme.R;
+import cn.mijack.meme.VideoSquareFragmentViewModel;
 import cn.mijack.meme.adapter.RecommendAdapter;
 import cn.mijack.meme.base.BaseFragment;
 import cn.mijack.meme.model.RecommendEntity;
-import cn.mijack.meme.remote.ApiParamsGen;
-import cn.mijack.meme.remote.ApiService;
-import cn.mijack.meme.remote.RetrofitClient;
+import cn.mijack.meme.remote.ApiResponse;
 import cn.mijack.meme.utils.NetWorkTypeUtils;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.observers.DisposableObserver;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * @author Mr.Yuan
  * @date 2017/5/25
  */
 public class VideoSquareFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener {
-    private static final int DEFAULT_PAGE_SIZE = 30;
     RecyclerView recyclerView;
     private SwipeRefreshLayout refreshLayout;
     private RecommendAdapter mAdapter;
+    VideoSquareFragmentViewModel videoSquareFragmentViewModel;
+    private CoordinatorLayout coordinatorLayout;
+    private Observer<ApiResponse<RecommendEntity>> observer =
+            (ApiResponse<RecommendEntity> apiResponse) -> {
+                RecommendEntity recommendEntity = apiResponse.body;
+                mAdapter.setData(recommendEntity);
+                refreshLayout.setRefreshing(false);
+                if (!TextUtils.isEmpty(recommendEntity.errorReason)) {
+                    Toast.makeText(getActivity(),apiResponse.errorReason,Toast.LENGTH_SHORT).show();
+//                    Snackbar.make(coordinatorLayout, apiResponse.errorReason, Snackbar.LENGTH_SHORT)
+//                            .setAction(R.string.retry, v -> onRefresh()).show();
+                }
+            };
 
     @Nullable
     @Override
@@ -41,7 +54,9 @@ public class VideoSquareFragment extends BaseFragment implements SwipeRefreshLay
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        videoSquareFragmentViewModel = ViewModelProviders.of(this).get(VideoSquareFragmentViewModel.class);
         refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+        coordinatorLayout = (CoordinatorLayout) view.findViewById(R.id.coordinatorLayout);
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         refreshLayout.setOnRefreshListener(this);
         refreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
@@ -55,40 +70,23 @@ public class VideoSquareFragment extends BaseFragment implements SwipeRefreshLay
         mAdapter = new RecommendAdapter(getActivity());
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(mAdapter);
-        loadData();
-    }
-
-    private void loadData() {
         if (!NetWorkTypeUtils.isNetAvailable(getActivity())) {
             refreshLayout.setRefreshing(false);
             Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_SHORT).show();
             return;
         }
-        RetrofitClient client = RetrofitClient.getInstance();
-        ApiService apiService  =client.createApi(ApiService.class);
-        apiService.qiyiRecommendDetail(ApiParamsGen.genRecommendDetailParams(getActivity(), 0, DEFAULT_PAGE_SIZE))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableObserver<RecommendEntity>() {
-
-                    @Override
-                    public void onNext(RecommendEntity recommendEntity) {
-                        mAdapter.setData(recommendEntity);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        refreshLayout.setRefreshing(false);
-                    }
-
-                    @Override
-                    public void onComplete() {
-                    }
-                });
+        videoSquareFragmentViewModel.getRecommendDetail(getActivity())
+                .observe(this, observer);
     }
 
     @Override
     public void onRefresh() {
-        loadData();
+        if (!NetWorkTypeUtils.isNetAvailable(getActivity())) {
+            refreshLayout.setRefreshing(false);
+            Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        videoSquareFragmentViewModel.reloadRecommendDetail(getActivity())
+                .observe(this, observer);
     }
 }

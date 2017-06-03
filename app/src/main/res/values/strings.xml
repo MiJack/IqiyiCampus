@@ -93,4 +93,5 @@
     <string name="play_count">播放量:%1$s</string>
     <string name="sns_score">评分:%1$s</string>
     <string name="network_error">网络异常</string>
+    <string name="retry">重试</string>
 </resources>

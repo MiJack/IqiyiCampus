@@ -66,7 +66,7 @@ public abstract class NetworkBoundResource<ResultType, RequestType> {
             } else {
                 onFetchFailed();
                 result.addSource(dbSource,
-                        newData -> result.setValue(Resource.error(response.errorMessage, newData)));
+                        newData -> result.setValue(Resource.error(response.errorReason, newData)));
             }
         });
     }

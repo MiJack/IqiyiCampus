@@ -5,6 +5,9 @@ package cn.mijack.meme.remote;
  * @date 2017/5/26
  */
 
+import android.arch.lifecycle.LiveData;
+
+import java.util.List;
 import java.util.Map;
 
 import cn.mijack.meme.model.ChannelDetailEntity;
@@ -16,6 +19,7 @@ import retrofit2.http.QueryMap;
 
 /**
  * Created by zhouxiaming on 2017/4/11.
+ * @change by Yuan Yujie
  */
 public interface ApiService {
     /**
@@ -41,5 +45,13 @@ public interface ApiService {
      */
     @GET("recommend")
     Observable<RecommendEntity> qiyiRecommendDetail(@QueryMap Map<String, String> params);
+
+    /**
+     * 获取推荐页数据接口
+     * @param params
+     * @return
+     */
+    @GET("recommend")
+    LiveData<ApiResponse<RecommendEntity>> recommendDetail(@QueryMap Map<String, String> params);
 
 }
