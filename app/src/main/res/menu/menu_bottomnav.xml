@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/m1"
+        android:enabled="true"
+        android:icon="@drawable/ic_icon"
+        android:title="推荐"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/m2"
+        android:enabled="true"
+        android:icon="@drawable/ic_icon"
+        android:title="频道"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/m3"
+        android:enabled="true"
+        android:icon="@drawable/ic_icon"
+        android:title="Meme"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/m4"
+        android:enabled="true"
+        android:icon="@drawable/ic_icon"
+        android:title="账号"
+        app:showAsAction="ifRoom" />
+</menu>

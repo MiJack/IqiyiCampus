@@ -22,13 +22,14 @@ import cn.mijack.meme.adapter.RecommendAdapter;
 import cn.mijack.meme.base.BaseFragment;
 import cn.mijack.meme.model.RecommendEntity;
 import cn.mijack.meme.remote.ApiResponse;
+import cn.mijack.meme.ui.IReload;
 import cn.mijack.meme.utils.NetWorkTypeUtils;
 
 /**
  * @author Mr.Yuan
  * @date 2017/5/25
  */
-public class VideoSquareFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener {
+public class VideoSquareFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener, IReload {
     RecyclerView recyclerView;
     private SwipeRefreshLayout refreshLayout;
     private RecommendAdapter mAdapter;
@@ -40,7 +41,7 @@ public class VideoSquareFragment extends BaseFragment implements SwipeRefreshLay
                 mAdapter.setData(recommendEntity);
                 refreshLayout.setRefreshing(false);
                 if (!TextUtils.isEmpty(recommendEntity.errorReason)) {
-                    Toast.makeText(getActivity(),apiResponse.errorReason,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), apiResponse.errorReason, Toast.LENGTH_SHORT).show();
 //                    Snackbar.make(coordinatorLayout, apiResponse.errorReason, Snackbar.LENGTH_SHORT)
 //                            .setAction(R.string.retry, v -> onRefresh()).show();
                 }
@@ -88,5 +89,11 @@ public class VideoSquareFragment extends BaseFragment implements SwipeRefreshLay
         }
         videoSquareFragmentViewModel.reloadRecommendDetail(getActivity())
                 .observe(this, observer);
+    }
+
+    @Override
+    public void reload() {
+        refreshLayout.setRefreshing(true);
+        onRefresh();
     }
 }

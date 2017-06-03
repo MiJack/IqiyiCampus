@@ -4,7 +4,7 @@ import cn.mijack.meme.base.BaseFragment;
 
 /**
  * @author Mr.Yuan
- * @date 2017/5/26
+ * @date 2017/6/3
  */
-public class VideoPlayFragment extends BaseFragment {
+public class ChannelSquareFragment extends BaseFragment {
 }
