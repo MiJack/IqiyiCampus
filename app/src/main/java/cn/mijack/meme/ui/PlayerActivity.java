@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
 import android.media.Image;
@@ -21,12 +22,15 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -139,7 +143,20 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
     private ImageView mPlayPauseView;
     private LinearLayout controlBack;
     private ImageView mFullScreenView;
+    private ConstraintLayout mConstraintLayout;
+    private boolean mIsLandscape;
+    //注册 Settings.System.ACCELEROMETER_ROTATION
 
+    private ContentObserver rotationObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            if (selfChange) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+            } else {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+            }
+        }
+    };
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -151,6 +168,8 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
             return;
         }
         mMediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        getContentResolver().registerContentObserver(Settings.System.getUriFor(Settings.System.ACCELEROMETER_ROTATION),
+                true, rotationObserver);
 
         setContentView(R.layout.activity_player);
         mVideoView = (QiyiVideoView) findViewById(R.id.id_videoview);
@@ -164,18 +183,31 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
         mTotalTime = (TextView) findViewById(R.id.id_total_time);
         controlBack = (LinearLayout) findViewById(R.id.controlBack);
         mFullScreenView = (ImageView) findViewById(R.id.id_full_screen);
+        mConstraintLayout = (ConstraintLayout) findViewById(R.id.activity_main);
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+
         mFullScreenView.setOnClickListener(v -> {
             Log.d(TAG, "click:  mFullScreenView");
-            int requestedOrientation = getRequestedOrientation();
-            if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            if (mIsLandscape == false) {
+                //竖屏
+                mFullScreenView.setImageResource(R.drawable.ic_fullscreen_exit);
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+//                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            } else {
                 //横屏
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                mFullScreenView.setImageResource(R.drawable.ic_fullscreen_exit);
-            } else if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
-                //竖屏
-                mFullScreenView.setImageResource(R.drawable.ic_fullscreen);
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                mFullScreenView.setImageResource(R.drawable.ic_fullscreen );
+//                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }
+//            int requestedOrientation = getRequestedOrientation();
+//            int orientation = getResources().getConfiguration().orientation;
+//            if (requestedOrientation==ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+//            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//            } else /*if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)*/ {
+//                //竖屏
+//                mFullScreenView.setImageResource(R.drawable.ic_fullscreen_exit);
+//                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+//            }
         });
         mVideoView.setOnClickListener(v -> {
             if (controlBack.getVisibility() != View.VISIBLE) {
@@ -250,6 +282,7 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
         mMainHandler.removeCallbacksAndMessages(null);
         mVideoView.release();
         mVideoView = null;
+        getContentResolver().unregisterContentObserver(rotationObserver);
     }
 
     /**
@@ -436,13 +469,47 @@ public class PlayerActivity extends BaseActivity /*implements ImageReader.OnImag
         sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // TODO: 16/6/14 横屏相关操作
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            // TODO: 16/6/14 竖屏相关操作
-        }
+@Override
+public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+    if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
+        //设置全屏即隐藏状态栏
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        mIsLandscape = true;
+
+        ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
+        mConstraintSet.clone(getBaseContext(), R.layout.activity_player); //
+        mConstraintSet.constrainWidth(R.id.id_videoview,0);
+        mConstraintSet.constrainHeight(R.id.id_videoview,0);
+        mConstraintSet.connect(R.id.id_videoview,ConstraintSet.LEFT,R.id.activity_main,ConstraintSet.LEFT);
+        mConstraintSet.connect(R.id.id_videoview,ConstraintSet.TOP,R.id.activity_main,ConstraintSet.TOP);
+        mConstraintSet.connect(R.id.id_videoview,ConstraintSet.RIGHT,R.id.activity_main,ConstraintSet.RIGHT);
+        mConstraintSet.connect(R.id.id_videoview,ConstraintSet.BOTTOM,R.id.activity_main,ConstraintSet.BOTTOM);
+        mConstraintLayout.setConstraintSet(mConstraintSet);
+        //横屏 视频充满全屏
+//        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mFleader.getLayoutParams();
+//        layoutParams.height = LinearLayout.LayoutParams.MATCH_PARENT;
+//        layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
+//        mFleader.setLayoutParams(layoutParams);
+//        mWebView.setVisibility(View.GONE);
+    } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        //恢复状态栏
+        WindowManager.LayoutParams attrs = getWindow().getAttributes();
+        attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setAttributes(attrs);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        mIsLandscape = false;
+        ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
+        mConstraintSet.clone(getBaseContext(), R.layout.activity_player); // get constraints from layout
+        mConstraintLayout.setConstraintSet(mConstraintSet);
+        //竖屏 视频显示固定大小
+//        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mFleader.getLayoutParams();
+//        layoutParams.height = ViewUtils.dip2px(activity, 208);
+//        layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
+//        mFleader.setLayoutParams(layoutParams);
+//        //显示图文内容
+//        mWebView.setVisibility(View.VISIBLE);
     }
+}
 }

@@ -28,13 +28,17 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.MainActivity"></activity>
-        <activity android:name=".ui.PlayerActivity"></activity>
-        <activity android:name=".CaptureActivity" android:configChanges="orientation|screenSize">
-           <!-- <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+        <activity
+            android:name=".ui.PlayerActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"/>
+        <activity
+            android:name=".CaptureActivity"
+            android:configChanges="orientation|screenSize">
+            <!-- <intent-filter>
+                 <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>-->
+                 <category android:name="android.intent.category.LAUNCHER" />
+             </intent-filter>-->
 
         </activity>
     </application>
