@@ -2,7 +2,7 @@ package cn.mijack.meme.vm;
 
 import android.arch.lifecycle.ViewModel;
 
-import cn.mijack.meme.remote.ApiService;
+import cn.mijack.meme.remote.IqiyiApiService;
 import cn.mijack.meme.remote.RetrofitClient;
 
 /**
@@ -11,10 +11,10 @@ import cn.mijack.meme.remote.RetrofitClient;
  */
 public class MemeViewModel extends ViewModel {
     public static final int DEFAULT_PAGE_SIZE = 30;
-    protected ApiService apiService;
+    protected IqiyiApiService apiService;
 
     public MemeViewModel() {
         RetrofitClient client = RetrofitClient.getInstance();
-        apiService = client.createApi(ApiService.class);
+        apiService = client.createApi(IqiyiApiService.class);
     }
 }

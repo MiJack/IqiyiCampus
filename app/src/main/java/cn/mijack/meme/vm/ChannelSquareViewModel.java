@@ -1,14 +1,11 @@
 package cn.mijack.meme.vm;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 
 import cn.mijack.meme.model.ChannelEntity;
 import cn.mijack.meme.remote.ApiParamsGen;
 import cn.mijack.meme.remote.ApiResponse;
-import cn.mijack.meme.remote.ApiService;
-import cn.mijack.meme.remote.RetrofitClient;
 
 /**
  * @author Mr.Yuan
