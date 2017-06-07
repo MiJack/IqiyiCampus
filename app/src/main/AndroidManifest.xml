@@ -28,19 +28,11 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.MainActivity"></activity>
+        <activity android:name=".ui.AccountActivity" android:label="登录/注册"></activity>
+        <activity android:name=".ui.VideoHistoryActivity"></activity>
         <activity
             android:configChanges="orientation|screenSize|layoutDirection"
             android:name=".ui.PlayerActivity"/>
-        <activity
-            android:name=".CaptureActivity"
-            android:configChanges="orientation|screenSize">
-            <!-- <intent-filter>
-                 <action android:name="android.intent.action.MAIN" />
-
-                 <category android:name="android.intent.category.LAUNCHER" />
-             </intent-filter>-->
-
-        </activity>
     </application>
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION"></uses-permission>
 

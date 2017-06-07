@@ -12,7 +12,7 @@
         android:padding="8dp">
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/userAvatar"
             android:layout_width="64dp"
             android:layout_height="64dp"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -20,34 +20,35 @@
             app:srcCompat="@drawable/circle_dot_focus" />
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/userLogin"
             android:layout_width="wrap_content"
+            style="@style/TextAppearance.AppCompat.Title"
             android:layout_height="wrap_content"
             android:layout_marginStart="11dp"
             android:text="登录/注册"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toRightOf="@+id/imageView"
+            app:layout_constraintLeft_toRightOf="@+id/userAvatar"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/tvUserName"
             style="@style/TextAppearance.AppCompat.Body1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="UserName"
-            app:layout_constraintBottom_toTopOf="@id/textView5"
-            app:layout_constraintLeft_toRightOf="@id/textView4"
+            app:layout_constraintBottom_toTopOf="@id/tvUserEmail"
+            app:layout_constraintLeft_toRightOf="@id/userLogin"
             app:layout_constraintTop_toTopOf="parent"
 
             />
 
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/tvUserEmail"
             style="@style/TextAppearance.AppCompat.Body1"
             android:layout_width="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toRightOf="@id/textView4"
-            app:layout_constraintTop_toBottomOf="@id/textView6"
+            app:layout_constraintLeft_toRightOf="@id/userLogin"
+            app:layout_constraintTop_toBottomOf="@id/tvUserName"
             android:layout_height="wrap_content"
             android:text="UserEmail" />
 
@@ -60,8 +61,8 @@
         android:background="#eeeeee" />
 
     <TextView
-        android:id="@+id/button3"
-        style="@style/TextAppearance.AppCompat.Body1.Button"
+        android:id="@+id/btnVideo"
+        style="@style/TextAppearance.AppCompat.Subhead.Button"
         android:text="看过的视频" />
 
     <View
@@ -70,8 +71,8 @@
         android:background="#eeeeee" />
 
     <TextView
-        android:id="@+id/button4"
-        style="@style/TextAppearance.AppCompat.Body1.Button"
+        android:id="@+id/btnMeme"
+        style="@style/TextAppearance.AppCompat.Subhead.Button"
         android:text="上传的Meme" />
 
     <View
@@ -80,8 +81,8 @@
         android:background="#eeeeee" />
 
     <TextView
-        android:id="@+id/button5"
-        style="@style/TextAppearance.AppCompat.Body1.Button"
+        android:id="@+id/btnLogout"
+        style="@style/TextAppearance.AppCompat.Subhead.Button"
         android:text="注销" />
     <View
         android:layout_width="fill_parent"

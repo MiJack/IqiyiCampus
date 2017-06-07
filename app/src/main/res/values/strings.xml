@@ -1,6 +1,19 @@
 <resources>
     <string name="app_name">Meme</string>
     <string name="copy_right"><![CDATA[Copy©Mi&Jack]]></string>
+
+    <string name="nick_name">昵称</string>
+    <string name="email">邮箱</string>
+    <string name="password_is_empty">密码为空</string>
+    <string name="password_too_short">密码长度不小于6</string>
+    <string name="email_is_empty">邮箱为空</string>
+    <string name="email_format_is_not_correct">邮箱格式错误</string>
+
+    <string name="login">登录</string>
+    <string name="create_account">创建账号</string>
+    <string name="password">密码</string>
+    <string name="login_with_your_account">使用你的账号进行登录</string>
+    <string name="signin_with_your_email">请使用你的email注册</string>
     <string name="large_text">
 "Material is the metaphor.\n\n"
 
@@ -94,4 +107,5 @@
     <string name="sns_score">评分:%1$s</string>
     <string name="network_error">网络异常</string>
     <string name="retry">重试</string>
+    <string name="userName">用户名</string>
 </resources>
