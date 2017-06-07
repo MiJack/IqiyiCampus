@@ -4,10 +4,8 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -50,12 +48,37 @@ public class ChannelDetailFragment extends BaseFragment implements SwipeRefreshL
             Toast.makeText(getActivity(), channelDetailEntityApiResponse.errorReason, Toast.LENGTH_SHORT).show();
         }
     };
+    private GridLayoutManager layoutManager;
+    private boolean isLoading = false;
+    private int visibleThreshold = 5;
+    private Observer<ApiResponse<ChannelDetailEntity>> loadMoreObserver = new Observer<ApiResponse<ChannelDetailEntity>>() {
+        @Override
+        public void onChanged(@Nullable ApiResponse<ChannelDetailEntity> channelDetailEntityApiResponse) {
+            refreshLayout.setRefreshing(false);
+            if (channelDetailEntityApiResponse != null && channelDetailEntityApiResponse.body != null) {
+                channelDetailAdapter.appendData(channelDetailEntityApiResponse.body.dataEntity);
+            }
+            if (!TextUtils.isEmpty(channelDetailEntityApiResponse.errorReason)) {
+                Toast.makeText(getActivity(), channelDetailEntityApiResponse.errorReason, Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_channel_detail, container, false);
     }
+
+    GridLayoutManager.SpanSizeLookup spanSizeLookup = new GridLayoutManager.SpanSizeLookup() {
+        @Override
+        public int getSpanSize(int i) {
+            if (channelDetailAdapter.hasMore() && channelDetailAdapter.getItemViewType(i) == ChannelDetailAdapter.ITEM_TYPE_LOAD) {
+                return RecommendAdapter.ROW_NUM;
+            }
+            return 1;
+        }
+    };
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -64,18 +87,32 @@ public class ChannelDetailFragment extends BaseFragment implements SwipeRefreshL
         channelName = args.getString(CHANNEL_NAME, null);
         channelDescribe = args.getString(CHANNEL_DESCRIBE, null);
         //修改成getParentFragment()
-        channelDetailViewModel = ViewModelProviders.of(this).get(ChannelDetailViewModel.class);
+        channelDetailViewModel = ViewModelProviders.of(getParentFragment() != null ? getParentFragment() : this)
+                .get(channelId, ChannelDetailViewModel.class);
         channelDetailViewModel.loadChannel(getActivity(), channelId, channelName)
                 .observe(this, observer);
         refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
-        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), RecommendAdapter.ROW_NUM);
-        // TODO: 2017/6/4  setSpanSizeLookup 更多加载
+        layoutManager = new GridLayoutManager(getActivity(), RecommendAdapter.ROW_NUM);
         recyclerView.setLayoutManager(layoutManager);
+        layoutManager.setSpanSizeLookup(spanSizeLookup);
         channelDetailAdapter = new ChannelDetailAdapter();
         recyclerView.setAdapter(channelDetailAdapter);
         refreshLayout.setOnRefreshListener(this);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                int totalItemCount = layoutManager.getItemCount();
+                int lastVisibleItem = layoutManager.findLastVisibleItemPosition();
+                if (!isLoading && totalItemCount <= (lastVisibleItem + visibleThreshold) && channelDetailAdapter.hasMore()) {
+                    channelDetailViewModel.loadMore(getActivity(), channelId, channelName, channelDetailAdapter.getCurrentPageIndex()).observe(ChannelDetailFragment.this, loadMoreObserver);
+                    isLoading = true;
+                }
+            }
+        });
     }
+
 
     public static ChannelDetailFragment newInstantiate(ChannelEntity.Channel channel) {
         ChannelDetailFragment channelDetailFragment = new ChannelDetailFragment();

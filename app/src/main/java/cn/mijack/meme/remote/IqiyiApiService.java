@@ -6,6 +6,7 @@ package cn.mijack.meme.remote;
  */
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,6 @@ public interface IqiyiApiService {
      * @return
      */
     @GET("channel")
-    LiveData<ApiResponse<ChannelDetailEntity>> channelDetail(@QueryMap Map<String, String> params);
+    MutableLiveData<ApiResponse<ChannelDetailEntity>> channelDetail(@QueryMap Map<String, String> params);
 
 }

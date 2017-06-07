@@ -75,6 +75,7 @@ public class RetrofitClient {
                 .client(httpclient)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addCallAdapterFactory(new LiveDataCallAdapterFactory())
+                .addCallAdapterFactory(new MutableLiveDataCallAdapterFactory())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
     }
@@ -94,7 +95,7 @@ public class RetrofitClient {
         //拦截器:打印Log
         if (isDebug) {
             clientBuilder.addInterceptor(new LogInterceptor());
-            clientBuilder.addInterceptor(new StethoInterceptor());
+            clientBuilder.addNetworkInterceptor(new StethoInterceptor());
         }
 
         //拦截器:重试请求

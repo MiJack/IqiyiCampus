@@ -26,10 +26,12 @@ import cn.mijack.meme.utils.StringUtils;
  * @date 2017/6/4
  */
 public class ChannelDetailAdapter extends RecyclerView.Adapter<ChannelDetailAdapter.VideoInfoViewHolder> {
+    public static final int ITEM_TYPE_LOAD = 1;
     private String channelId;
     private String channelName;
     private String total;
     private List<VideoInfo> videoInfos = new ArrayList<>();
+    private int currentPageIndex = 0;
 
     @Override
     public VideoInfoViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
@@ -52,7 +54,33 @@ public class ChannelDetailAdapter extends RecyclerView.Adapter<ChannelDetailAdap
         if (dataEntity == null || dataEntity.videoInfoList == null) {
             return;
         }
+        currentPageIndex = 0;
         this.videoInfos.clear();
+        this.videoInfos.addAll(dataEntity.videoInfoList);
+        this.channelId = dataEntity.channelId;
+        this.channelName = dataEntity.channelName;
+        this.total = dataEntity.total;
+        this.notifyDataSetChanged();
+    }
+
+    public boolean hasMore() {
+        try {
+            int total = Integer.valueOf(this.total);
+            return total > videoInfos.size();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public int getCurrentPageIndex() {
+        return currentPageIndex;
+    }
+
+    public void appendData(ChannelDetailEntity.DataEntity dataEntity) {
+        if (dataEntity == null || dataEntity.videoInfoList == null) {
+            return;
+        }
+        currentPageIndex++;
         this.videoInfos.addAll(dataEntity.videoInfoList);
         this.channelId = dataEntity.channelId;
         this.channelName = dataEntity.channelName;

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/circle_dot_focus" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="11dp"
+            android:text="登录/注册"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/imageView"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textView6"
+            style="@style/TextAppearance.AppCompat.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UserName"
+            app:layout_constraintBottom_toTopOf="@id/textView5"
+            app:layout_constraintLeft_toRightOf="@id/textView4"
+            app:layout_constraintTop_toTopOf="parent"
+
+            />
+
+        <TextView
+            android:id="@+id/textView5"
+            style="@style/TextAppearance.AppCompat.Body1"
+            android:layout_width="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/textView4"
+            app:layout_constraintTop_toBottomOf="@id/textView6"
+            android:layout_height="wrap_content"
+            android:text="UserEmail" />
+
+
+    </android.support.constraint.ConstraintLayout>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="32dp"
+        android:background="#eeeeee" />
+
+    <TextView
+        android:id="@+id/button3"
+        style="@style/TextAppearance.AppCompat.Body1.Button"
+        android:text="看过的视频" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="#eeeeee" />
+
+    <TextView
+        android:id="@+id/button4"
+        style="@style/TextAppearance.AppCompat.Body1.Button"
+        android:text="上传的Meme" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="32dp"
+        android:background="#eeeeee" />
+
+    <TextView
+        android:id="@+id/button5"
+        style="@style/TextAppearance.AppCompat.Body1.Button"
+        android:text="注销" />
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#eeeeee" />
+
+</LinearLayout>

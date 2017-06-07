@@ -203,7 +203,7 @@ public class PlayerActivity extends BaseActivity {
         mFullScreenView = (ImageView) findViewById(R.id.id_full_screen);
         mConstraintLayout = (ConstraintLayout) findViewById(R.id.activity_main);
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
-        setUpView();
+//        setUpView();
         mFullScreenView.setOnClickListener(v -> {
             Log.d(TAG, "click:  mFullScreenView");
             if (mIsLandscape == false) {
@@ -273,7 +273,7 @@ public class PlayerActivity extends BaseActivity {
         super.onSaveInstanceState(outState);
         int currentPosition = mVideoView.getCurrentPosition();
         outState.putInt(CURRENT_POSITION, currentPosition);
-        outState.putInt(DURATION,mVideoView.getDuration());
+        outState.putInt(DURATION, mVideoView.getDuration());
     }
 
     @Override
@@ -281,8 +281,8 @@ public class PlayerActivity extends BaseActivity {
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState.containsKey(CURRENT_POSITION)) {
             currentPosition = savedInstanceState.getInt(CURRENT_POSITION);
-            int duration= savedInstanceState.getInt(DURATION);
-            int progress =currentPosition;
+            int duration = savedInstanceState.getInt(DURATION);
+            int progress = currentPosition;
             if (duration > 0) {
                 mSeekBar.setMax(duration);
                 mSeekBar.setProgress(progress);
@@ -503,54 +503,11 @@ public class PlayerActivity extends BaseActivity {
         }
         sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
     }
-//
-//    @Override
-//    public void onConfigurationChanged(Configuration newConfig) {
-//        super.onConfigurationChanged(newConfig);
-//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
-//            //设置全屏即隐藏状态栏
-//            getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-//                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
-//            mIsLandscape = true;
-//
-//            ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
-//            mConstraintSet.clone(getBaseContext(), R.layout.activity_player); //
-//            mConstraintSet.constrainWidth(R.id.id_videoview, 0);
-//            mConstraintSet.constrainHeight(R.id.id_videoview, 0);
-//            mConstraintSet.connect(R.id.id_videoview, ConstraintSet.LEFT, R.id.activity_main, ConstraintSet.LEFT);
-//            mConstraintSet.connect(R.id.id_videoview, ConstraintSet.TOP, R.id.activity_main, ConstraintSet.TOP);
-//            mConstraintSet.connect(R.id.id_videoview, ConstraintSet.RIGHT, R.id.activity_main, ConstraintSet.RIGHT);
-//            mConstraintSet.connect(R.id.id_videoview, ConstraintSet.BOTTOM, R.id.activity_main, ConstraintSet.BOTTOM);
-//            mConstraintLayout.setConstraintSet(mConstraintSet);
-//            mVideoView.release();
-////            mVideoView
-//            //横屏 视频充满全屏
-////        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mFleader.getLayoutParams();
-////        layoutParams.height = LinearLayout.LayoutParams.MATCH_PARENT;
-////        layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
-////        mFleader.setLayoutParams(layoutParams);
-////        mWebView.setVisibility(View.GONE);
-//        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-//            //恢复状态栏
-//            WindowManager.LayoutParams attrs = getWindow().getAttributes();
-//            attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
-//            getWindow().setAttributes(attrs);
-//            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-//            mIsLandscape = false;
-//            ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
-//            mConstraintSet.clone(getBaseContext(), R.layout.activity_player); // get constraints from layout
-//            mConstraintLayout.setConstraintSet(mConstraintSet);
-//            //竖屏 视频显示固定大小
-////        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mFleader.getLayoutParams();
-////        layoutParams.height = ViewUtils.dip2px(activity, 208);
-////        layoutParams.width = LinearLayout.LayoutParams.MATCH_PARENT;
-////        mFleader.setLayoutParams(layoutParams);
-////        //显示图文内容
-////        mWebView.setVisibility(View.VISIBLE);
-//        }
-//    }
 
     private void setUpView() {
+
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        int screenHeight = getResources().getDisplayMetrics().heightPixels;
         Configuration configuration = getResources().getConfiguration();
         if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
             //设置全屏即隐藏状态栏
@@ -567,7 +524,10 @@ public class PlayerActivity extends BaseActivity {
             mConstraintSet.connect(R.id.id_videoview, ConstraintSet.RIGHT, R.id.activity_main, ConstraintSet.RIGHT);
             mConstraintSet.connect(R.id.id_videoview, ConstraintSet.BOTTOM, R.id.activity_main, ConstraintSet.BOTTOM);
             mConstraintLayout.setConstraintSet(mConstraintSet);
-            mVideoView.release();
+            if (mVideoView != null) {
+                mVideoView.setVideoViewSize(screenWidth, screenHeight, true);
+//            mVideoView.release();
+            }
             //横屏 视频充满全屏
 //        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mFleader.getLayoutParams();
 //        layoutParams.height = LinearLayout.LayoutParams.MATCH_PARENT;
@@ -577,6 +537,7 @@ public class PlayerActivity extends BaseActivity {
         } else if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             //恢复状态栏
             WindowManager.LayoutParams attrs = getWindow().getAttributes();
+            mVideoView.setVideoViewSize(screenWidth, (int) (screenWidth * 9.0 / 16));
             attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow().setAttributes(attrs);
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
@@ -587,4 +548,9 @@ public class PlayerActivity extends BaseActivity {
         }
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setUpView();
+    }
 }

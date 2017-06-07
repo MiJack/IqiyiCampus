@@ -1,6 +1,7 @@
 package cn.mijack.meme.vm;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
 import java.util.Map;
@@ -14,9 +15,9 @@ import cn.mijack.meme.remote.ApiResponse;
  * @date 2017/6/3
  */
 public class ChannelDetailViewModel extends MemeViewModel {
-    LiveData<ApiResponse<ChannelDetailEntity>> liveData;
+    MutableLiveData<ApiResponse<ChannelDetailEntity>> liveData;
 
-    public LiveData<ApiResponse<ChannelDetailEntity>> loadChannel(Context context, String channelId, String channelName) {
+    public MutableLiveData<ApiResponse<ChannelDetailEntity>> loadChannel(Context context, String channelId, String channelName) {
         if (liveData == null) {
             Map<String, String> channelDetailParams =
                     ApiParamsGen.genChannelDetailParams(
@@ -24,5 +25,17 @@ public class ChannelDetailViewModel extends MemeViewModel {
             liveData = apiService.channelDetail(channelDetailParams);
         }
         return liveData;
+    }
+
+    public LiveData<ApiResponse<ChannelDetailEntity>> loadMore(Context context, String channelId, String channelName,
+                                                               int pageIndex) {
+        if (liveData == null) {
+            liveData = loadChannel(context, channelId, channelName);
+            return liveData;
+        }
+        Map<String, String> channelDetailParams =
+                ApiParamsGen.genChannelDetailParams(
+                        context, channelId, channelName, pageIndex, DEFAULT_PAGE_SIZE);
+        return apiService.channelDetail(channelDetailParams);
     }
 }

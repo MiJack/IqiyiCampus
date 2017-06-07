@@ -39,7 +39,7 @@ public class VideoSquareFragment extends BaseFragment implements SwipeRefreshLay
                 RecommendEntity recommendEntity = apiResponse.body;
                 mAdapter.setData(recommendEntity);
                 refreshLayout.setRefreshing(false);
-                if (!TextUtils.isEmpty(recommendEntity.errorReason)) {
+                if (recommendEntity != null && !TextUtils.isEmpty(recommendEntity.errorReason)) {
                     Toast.makeText(getActivity(), apiResponse.errorReason, Toast.LENGTH_SHORT).show();
 //                    Snackbar.make(coordinatorLayout, apiResponse.errorReason, Snackbar.LENGTH_SHORT)
 //                            .setAction(R.string.retry, v -> onRefresh()).show();
