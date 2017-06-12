@@ -156,7 +156,7 @@ public class ChannelDetailAdapter extends RecyclerView.Adapter<ChannelDetailAdap
         @Override
         public void onClick(View view) {
             if (video != null) {
-                QYPlayerUtils.jumpToPlayerActivity(context, video.aId, video.tId);
+                QYPlayerUtils.jumpToPlayerActivity(context, video);
 
             }
         }

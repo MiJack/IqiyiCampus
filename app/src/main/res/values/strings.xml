@@ -108,4 +108,6 @@
     <string name="network_error">网络异常</string>
     <string name="retry">重试</string>
     <string name="userName">用户名</string>
+    <string name="login_ok">登录成功</string>
+    <string name="register_ok">注册成功</string>
 </resources>

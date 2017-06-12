@@ -8,13 +8,14 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import cn.mijack.meme.R;
 import cn.mijack.meme.base.BaseActivity;
 import cn.mijack.meme.remote.ApiService;
 import cn.mijack.meme.remote.RetrofitClient;
+import cn.mijack.meme.user.UserManager;
 import cn.mijack.meme.utils.TextHelper;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -107,31 +108,46 @@ public class AccountActivity extends BaseActivity implements View.OnClickListene
             nextAction.setText(R.string.create_account);
             otherChoice.setText(R.string.login);
             info.setText(R.string.signin_with_your_email);
-            userNameLayout.setVisibility(View.GONE);
-        } else if (status == LOGIN) {
             userNameLayout.setVisibility(View.VISIBLE);
+        } else if (status == LOGIN) {
+            userNameLayout.setVisibility(View.GONE);
             otherChoice.setText(R.string.create_account);
             nextAction.setText(R.string.login);
             info.setText(R.string.login_with_your_account);
-//                    emailLayout.requestFocus();
         }
     }
 
     private void create(String nickName, String email, String password) {
-        apiService.login(nickName, email, password)
+        apiService.register(nickName, email, password)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(userResult -> {
-
+                    int code = userResult.getCode();
+                    if (code == 200) {
+                        setResult(RESULT_OK);
+                        UserManager.get(this).save(userResult.getData());
+                        finish();
+                        Toast.makeText(this, R.string.register_ok, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, userResult.getMsg(), Toast.LENGTH_SHORT).show();
+                    }
                 });
     }
 
     private void login(String email, String password) {
-        apiService.register(email, password)
+        apiService.login(email, password)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(userResult -> {
-
+                    int code = userResult.getCode();
+                    if (code == 200) {
+                        setResult(RESULT_OK);
+                        UserManager.get(this).save(userResult.getData());
+                        Toast.makeText(this, R.string.login_ok, Toast.LENGTH_SHORT).show();
+                        finish();
+                    } else {
+                        Toast.makeText(this, userResult.getMsg(), Toast.LENGTH_SHORT).show();
+                    }
                 });
     }
 }

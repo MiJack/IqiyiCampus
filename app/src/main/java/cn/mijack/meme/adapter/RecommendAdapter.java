@@ -293,7 +293,7 @@ public class RecommendAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             BaseEntity dataObj = entityList.get(position);
             if (dataObj instanceof VideoInfo) {
                 VideoInfo videoInfo = (VideoInfo)dataObj;
-                QYPlayerUtils.jumpToPlayerActivity(context, videoInfo.aId, videoInfo.tId);
+                QYPlayerUtils.jumpToPlayerActivity(context, videoInfo);
             }
         }
     }
@@ -375,7 +375,7 @@ public class RecommendAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         @Override
         public void onClick(View v) {
             VideoInfo videoInfo = (VideoInfo)v.getTag(R.id.tag_key);
-            QYPlayerUtils.jumpToPlayerActivity(context, videoInfo.aId, videoInfo.tId);
+            QYPlayerUtils.jumpToPlayerActivity(context, videoInfo);
         }
     }
 

@@ -11,18 +11,19 @@ import retrofit2.http.POST;
  * @date 2017/6/4
  */
 public interface ApiService {
-    String SERVER = "http://192.168.1.104:8080";
+    String HOST = "develop.mijack.cn";
+    String SERVER = "http://" + HOST + ":8080";
 //    public static final String SERVER = "http://192.168.1.104:8080";
 
     @POST(SERVER + "/login")
     @FormUrlEncoded
-    Observable<Result<User>> login(@Field("userName") String username,
+    Observable<Result<User>> login(
                                    @Field("userEmail") String userEmail,
                                    @Field("password") String password);
 
     @POST(SERVER + "/register")
     @FormUrlEncoded
-    Observable<Result<User>> register(
+    Observable<Result<User>> register(@Field("userName") String username,
             @Field("userEmail") String userEmail,
             @Field("password") String password);
 }

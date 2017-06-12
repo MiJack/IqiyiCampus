@@ -1,13 +1,19 @@
 package cn.mijack.meme.user;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * @author Mr.Yuan
  * @date 2017/6/8
  */
 public class User {
+    @SerializedName("userEmail")
     private String email;
+    @SerializedName("username")
     private String nickName;
+    @SerializedName("id")
     private int uid;
+    @SerializedName("userAvatar")
     private String avatarUrl;
 
     public User() {

@@ -129,7 +129,10 @@ public class AccountFragment extends BaseFragment implements View.OnClickListene
         new AlertDialog.Builder(getActivity())
                 .setTitle("注销")
                 .setMessage("你确定要注销账号嘛")
-                .setPositiveButton("确定", (dialog, which) -> userManager.logout())
+                .setPositiveButton("确定", (dialog, which) -> {
+                    userManager.logout();
+                    updateUserInfo();
+                })
                 .setNegativeButton("取消", (dialog, which) -> dialog.cancel())
                 .create().show();
     }

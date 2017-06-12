@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
             style="@style/TextAppearance.AppCompat.Title"
             android:layout_height="wrap_content"
-            android:layout_marginStart="11dp"
+            android:layout_marginLeft="16dp"
             android:text="登录/注册"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@+id/userAvatar"
@@ -35,15 +35,16 @@
             style="@style/TextAppearance.AppCompat.Body1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
             android:text="UserName"
             app:layout_constraintBottom_toTopOf="@id/tvUserEmail"
             app:layout_constraintLeft_toRightOf="@id/userLogin"
             app:layout_constraintTop_toTopOf="parent"
-
-            />
+            app:layout_constraintVertical_chainStyle="spread" />
 
         <TextView
             android:id="@+id/tvUserEmail"
+            android:layout_marginLeft="16dp"
             style="@style/TextAppearance.AppCompat.Body1"
             android:layout_width="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"

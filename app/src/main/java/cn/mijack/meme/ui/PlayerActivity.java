@@ -26,6 +26,7 @@ import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -79,6 +80,7 @@ public class PlayerActivity extends BaseActivity {
     private SeekBar mSeekBar;
     private TextView mCurrentTime;
     private TextView mTotalTime;
+    private DrawerLayout drawerLayout;
 
     IQYPlayerHandlerCallBack mCallBack = new IQYPlayerHandlerCallBack() {
         /**
@@ -202,7 +204,14 @@ public class PlayerActivity extends BaseActivity {
         controlBack = (LinearLayout) findViewById(R.id.controlBack);
         mFullScreenView = (ImageView) findViewById(R.id.id_full_screen);
         mConstraintLayout = (ConstraintLayout) findViewById(R.id.activity_main);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+        Configuration configuration = getResources().getConfiguration();
+        if (configuration.orientation != Configuration.ORIENTATION_LANDSCAPE) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        } else {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        }
 //        setUpView();
         mFullScreenView.setOnClickListener(v -> {
             Log.d(TAG, "click:  mFullScreenView");
@@ -516,7 +525,7 @@ public class PlayerActivity extends BaseActivity {
             mIsLandscape = true;
 
             ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
-            mConstraintSet.clone(getBaseContext(), R.layout.activity_player); //
+            mConstraintSet.clone(getBaseContext(), R.layout.content_player); //
             mConstraintSet.constrainWidth(R.id.id_videoview, 0);
             mConstraintSet.constrainHeight(R.id.id_videoview, 0);
             mConstraintSet.connect(R.id.id_videoview, ConstraintSet.LEFT, R.id.activity_main, ConstraintSet.LEFT);
@@ -528,6 +537,7 @@ public class PlayerActivity extends BaseActivity {
                 mVideoView.setVideoViewSize(screenWidth, screenHeight, true);
 //            mVideoView.release();
             }
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
             //横屏 视频充满全屏
 //        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mFleader.getLayoutParams();
 //        layoutParams.height = LinearLayout.LayoutParams.MATCH_PARENT;
@@ -539,11 +549,12 @@ public class PlayerActivity extends BaseActivity {
             WindowManager.LayoutParams attrs = getWindow().getAttributes();
             mVideoView.setVideoViewSize(screenWidth, (int) (screenWidth * 9.0 / 16));
             attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
             getWindow().setAttributes(attrs);
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             mIsLandscape = false;
             ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
-            mConstraintSet.clone(getBaseContext(), R.layout.activity_player); // get constraints from layout
+            mConstraintSet.clone(getBaseContext(), R.layout.content_player); // get constraints from layout
             mConstraintLayout.setConstraintSet(mConstraintSet);
         }
     }
