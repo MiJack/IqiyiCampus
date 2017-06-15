@@ -110,4 +110,9 @@
     <string name="userName">用户名</string>
     <string name="login_ok">登录成功</string>
     <string name="register_ok">注册成功</string>
+    <string name="title_activity_demo">Demo</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_activity_meme">MemeActivity</string>
 </resources>

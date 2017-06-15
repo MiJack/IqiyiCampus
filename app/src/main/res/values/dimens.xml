@@ -2,4 +2,9 @@
 <resources>
     <dimen name="video_card_margin_margin_horizontal">2dp</dimen>
     <dimen name="main_card_margin_horizontal">4dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="videoViewMargin">96dp</dimen>
 </resources>

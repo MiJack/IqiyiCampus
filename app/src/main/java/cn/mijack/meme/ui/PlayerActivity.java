@@ -24,15 +24,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
+import android.support.transition.TransitionManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -56,8 +56,8 @@ import java.util.concurrent.TimeUnit;
 import cn.mijack.meme.BuildConfig;
 import cn.mijack.meme.R;
 import cn.mijack.meme.base.BaseActivity;
+import cn.mijack.meme.model.VideoInfo;
 import cn.mijack.meme.utils.LogUtils;
-import cn.mijack.meme.utils.StringUtils;
 import cn.mijack.meme.utils.Utils;
 import cn.mijack.meme.view.MemeVideoView;
 
@@ -80,7 +80,6 @@ public class PlayerActivity extends BaseActivity {
     private SeekBar mSeekBar;
     private TextView mCurrentTime;
     private TextView mTotalTime;
-    private DrawerLayout drawerLayout;
 
     IQYPlayerHandlerCallBack mCallBack = new IQYPlayerHandlerCallBack() {
         /**
@@ -149,6 +148,7 @@ public class PlayerActivity extends BaseActivity {
     private String mImageName;
     private Bitmap mBitmap;
     private ImageView mPlayPauseView;
+    private ImageView mMemeButton;
     private LinearLayout controlBack;
     private ImageView mFullScreenView;
     private ConstraintLayout mConstraintLayout;
@@ -178,25 +178,27 @@ public class PlayerActivity extends BaseActivity {
             }
         }
     };
+    private VideoInfo videoInfo;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
-        aid = getIntent().getStringExtra("aid");
-        tid = getIntent().getStringExtra("tid");
-        if (StringUtils.isEmpty(tid)) {
+        Intent intent = getIntent();
+        if (intent == null || intent.hasExtra("video") == false) {
             finish();
             return;
         }
         mMediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         getContentResolver().registerContentObserver(Settings.System.getUriFor(Settings.System.ACCELEROMETER_ROTATION),
                 true, rotationObserver);
-
-        setContentView(R.layout.activity_player);
+        videoInfo = (VideoInfo) intent.getSerializableExtra("video");
+        setContentView(R.layout.activity_player_portrait);
         mVideoView = (MemeVideoView) findViewById(R.id.id_videoview);
+        mMemeButton = (ImageView) findViewById(R.id.idMeme);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         //mVideoView.setPlayData("667737400");
-        mVideoView.setPlayData(tid);
+        mVideoView.setPlayData(videoInfo.tId);
         //设置回调，监听播放器状态
         setPlayerCallback();
         mCurrentTime = (TextView) findViewById(R.id.id_current_time);
@@ -204,14 +206,7 @@ public class PlayerActivity extends BaseActivity {
         controlBack = (LinearLayout) findViewById(R.id.controlBack);
         mFullScreenView = (ImageView) findViewById(R.id.id_full_screen);
         mConstraintLayout = (ConstraintLayout) findViewById(R.id.activity_main);
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
-        Configuration configuration = getResources().getConfiguration();
-        if (configuration.orientation != Configuration.ORIENTATION_LANDSCAPE) {
-            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        } else {
-            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-        }
 //        setUpView();
         mFullScreenView.setOnClickListener(v -> {
             Log.d(TAG, "click:  mFullScreenView");
@@ -225,24 +220,42 @@ public class PlayerActivity extends BaseActivity {
                 mFullScreenView.setImageResource(R.drawable.ic_fullscreen);
             }
         });
+        mPlayPauseView.setOnClickListener(v -> {
+            if (mVideoView.isPlaying()) {
+                pauseVideo();
+            } else {
+                startVideo();
+            }
+        });
         mVideoView.setOnClickListener(v -> {
+            // todo 判断是否在获取截图，是则无反应
             if (controlBack.getVisibility() != View.VISIBLE) {
                 controlBack.setVisibility(View.VISIBLE);
             } else {
                 controlBack.setVisibility(View.GONE);
             }
         });
-        mPlayPauseView = (ImageView) findViewById(R.id.idPlayPause);
-        mPlayPauseView.setOnClickListener(v -> {
-            if (mVideoView.isPlaying()) {
-                mVideoView.pause();
-                mPlayPauseView.setImageResource(R.drawable.ic_play_arrow);
-                mMainHandler.removeMessages(HANDLER_MSG_UPDATE_PROGRESS);
-            } else {
-                mVideoView.start();
-                mPlayPauseView.setImageResource(R.drawable.ic_pause);
-                mMainHandler.sendEmptyMessageDelayed(HANDLER_MSG_UPDATE_PROGRESS, HANDLER_DEPLAY_UPDATE_PROGRESS);
-            }
+
+        //请求
+        mMemeButton.setOnClickListener(v -> {
+            pauseVideo();
+            //todo add listener
+            TransitionManager.beginDelayedTransition(mConstraintLayout);
+            ConstraintSet constraintSet = new ConstraintSet();
+            constraintSet.clone(this, R.layout.activity_player_meme);
+            constraintSet.applyTo(mConstraintLayout);
+            DisplayMetrics metric = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metric);
+            int width = metric.widthPixels - getResources().getDimensionPixelOffset(R.dimen.videoViewMargin) * 2;
+            int height = (int) (width * 9.0 / 16);
+            mVideoView.setVideoViewSize(width,height);
+//            controlBack.setVisibility(View.GONE);
+//            if (mImageReader == null) {
+//                startActivityForResult(mMediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
+//            } else {
+////            mImageReader.close();
+//                handlerImage(mImageReader.acquireLatestImage());
+//            }
         });
 
         mSeekBar = (SeekBar) findViewById(R.id.id_progress);
@@ -270,36 +283,20 @@ public class PlayerActivity extends BaseActivity {
         });
     }
 
+    private void startVideo() {
+        mVideoView.start();
+        mPlayPauseView.setImageResource(R.drawable.ic_pause);
+        mMainHandler.sendEmptyMessageDelayed(HANDLER_MSG_UPDATE_PROGRESS, HANDLER_DEPLAY_UPDATE_PROGRESS);
+    }
+
     private void setPlayerCallback() {
         mVideoView.setPlayerCallBack(mCallBack);
     }
 
-    public static final String CURRENT_POSITION = "currentPosition";
-    public static final String DURATION = "duration";
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        int currentPosition = mVideoView.getCurrentPosition();
-        outState.putInt(CURRENT_POSITION, currentPosition);
-        outState.putInt(DURATION, mVideoView.getDuration());
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState.containsKey(CURRENT_POSITION)) {
-            currentPosition = savedInstanceState.getInt(CURRENT_POSITION);
-            int duration = savedInstanceState.getInt(DURATION);
-            int progress = currentPosition;
-            if (duration > 0) {
-                mSeekBar.setMax(duration);
-                mSeekBar.setProgress(progress);
-
-                mTotalTime.setText(ms2hms(duration));
-                mCurrentTime.setText(ms2hms(progress));
-            }
-        }
+    private void pauseVideo() {
+        mVideoView.pause();
+        mPlayPauseView.setImageResource(R.drawable.ic_play_arrow);
+        mMainHandler.removeMessages(HANDLER_MSG_UPDATE_PROGRESS);
     }
 
     @Override
@@ -333,6 +330,9 @@ public class PlayerActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mediaProjection != null) {
+            mediaProjection.stop();
+        }
         mMainHandler.removeCallbacksAndMessages(null);
         mVideoView.release();
         mVideoView = null;
@@ -462,7 +462,7 @@ public class PlayerActivity extends BaseActivity {
             int pixelStride = planes[0].getPixelStride();
             int rowStride = planes[0].getRowStride();
             int rowPadding = rowStride - pixelStride * width;
-            mBitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
+            Bitmap mBitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
             mBitmap.copyPixelsFromBuffer(buffer);
             Bitmap bitmap = Bitmap.createBitmap(mVideoView.getWidth(), mVideoView.getHeight(), Bitmap.Config.ARGB_8888);
             int[] location = new int[2];
@@ -470,12 +470,27 @@ public class PlayerActivity extends BaseActivity {
             int left = location[0];
             int top = location[1];
             System.out.println("left:" + location[0] + " top:" + location[1]);
-            for (int i = 0; i < mVideoView.getWidth(); i++) {
-                for (int j = 0; j < mVideoView.getHeight(); j++) {
-                    bitmap.setPixel(i, j, mBitmap.getPixel(left + i, top + j));
+            try {
+                for (int i = 0; i < mVideoView.getWidth(); i++) {
+                    for (int j = 0; j < mVideoView.getHeight(); j++) {
+                        bitmap.setPixel(i, j, mBitmap.getPixel(left + i, top + j));
+                    }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+            System.out.println("ok");
             saveBitmapFile(bitmap);
+            DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+            String png = "myscreen_" + dateFormat.format(new Date(System.currentTimeMillis())) + ".png";
+            try {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, this.openFileOutput(png, Context.MODE_PRIVATE));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            Intent intent = new Intent(this, MemeActivity.class);
+            intent.putExtra("image", png);
+            startActivity(intent);
             image.close();
         }).start();
     }
@@ -514,7 +529,6 @@ public class PlayerActivity extends BaseActivity {
     }
 
     private void setUpView() {
-
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
         Configuration configuration = getResources().getConfiguration();
@@ -523,9 +537,9 @@ public class PlayerActivity extends BaseActivity {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
             mIsLandscape = true;
-
+            recyclerView.setVisibility(View.GONE);
             ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
-            mConstraintSet.clone(getBaseContext(), R.layout.content_player); //
+            mConstraintSet.clone(getBaseContext(), R.layout.activity_player_landscape); //
             mConstraintSet.constrainWidth(R.id.id_videoview, 0);
             mConstraintSet.constrainHeight(R.id.id_videoview, 0);
             mConstraintSet.connect(R.id.id_videoview, ConstraintSet.LEFT, R.id.activity_main, ConstraintSet.LEFT);
@@ -537,7 +551,7 @@ public class PlayerActivity extends BaseActivity {
                 mVideoView.setVideoViewSize(screenWidth, screenHeight, true);
 //            mVideoView.release();
             }
-            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+            mMemeButton.setVisibility(View.VISIBLE);
             //横屏 视频充满全屏
 //        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mFleader.getLayoutParams();
 //        layoutParams.height = LinearLayout.LayoutParams.MATCH_PARENT;
@@ -549,12 +563,13 @@ public class PlayerActivity extends BaseActivity {
             WindowManager.LayoutParams attrs = getWindow().getAttributes();
             mVideoView.setVideoViewSize(screenWidth, (int) (screenWidth * 9.0 / 16));
             attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
             getWindow().setAttributes(attrs);
+            recyclerView.setVisibility(View.VISIBLE);
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
             mIsLandscape = false;
+            mMemeButton.setVisibility(View.GONE);
             ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
-            mConstraintSet.clone(getBaseContext(), R.layout.content_player); // get constraints from layout
+            mConstraintSet.clone(getBaseContext(), R.layout.activity_player_portrait); // get constraints from layout
             mConstraintLayout.setConstraintSet(mConstraintSet);
         }
     }

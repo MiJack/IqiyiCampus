@@ -22,30 +22,11 @@ public class QYPlayerUtils {
      */
     public static void jumpToPlayerActivity(Context context, VideoInfo videoInfo) {
         Intent intent = new Intent(context, PlayerActivity.class);
-        intent.putExtra("aid", videoInfo.aId);
-        intent.putExtra("tid", videoInfo.tId);
+        intent.putExtra("video",videoInfo);
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
         context.startActivity(intent);
     }
 
-    /**
-     * 跳转到播放器播放
-     *
-     * @param context
-     * @param aid
-     * @param tid
-     */
-    @Deprecated
-    public static void jumpToPlayerActivity(Context context, String aid, String tid) {
-        LogUtils.i(TAG, "jumpToPlayerActivity aid: " + aid + " tid: " + tid);
-        Intent intent = new Intent(context, PlayerActivity.class);
-        intent.putExtra("aid", aid);
-        intent.putExtra("tid", tid);
-        if (!(context instanceof Activity)) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        }
-        context.startActivity(intent);
-    }
 }

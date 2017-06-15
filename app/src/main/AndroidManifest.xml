@@ -2,15 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="cn.mijack.meme">
 
-    <!--网络访问需要的权限-->
+    <!-- 网络访问需要的权限 -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <!--获取手机IMEI号需要的权限-->
+    <!-- 获取手机IMEI号需要的权限 -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <!--获取WI-FI状态以及Mac地址需要的权限-->
+    <!-- 获取WI-FI状态以及Mac地址需要的权限 -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <!--判断网络连接状态需要-->
+    <!-- 判断网络连接状态需要 -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
 
     <application
         android:name=".MemeApplication"
@@ -27,13 +28,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.MainActivity"></activity>
-        <activity android:name=".ui.AccountActivity" android:label="登录/注册"></activity>
-        <activity android:name=".ui.VideoHistoryActivity"></activity>
+        <activity android:name=".ui.MainActivity" />
         <activity
-            android:configChanges="orientation|screenSize|layoutDirection"
-            android:name=".ui.PlayerActivity"/>
+            android:name=".ui.AccountActivity"
+            android:label="登录/注册" />
+        <activity android:name=".ui.VideoHistoryActivity" />
+        <activity
+            android:name=".ui.PlayerActivity"
+            android:configChanges="orientation|screenSize|layoutDirection"/>
+        <activity
+            android:name=".ui.MemeActivity"
+            android:label="@string/title_activity_meme"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
-    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION"></uses-permission>
 
 </manifest>
