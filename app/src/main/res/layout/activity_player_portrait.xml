@@ -80,7 +80,17 @@
             android:layout_height="28dp"
             android:src="@drawable/ic_fullscreen" />
     </LinearLayout>
-
+    <TextView
+        android:id="@+id/msg"
+        android:text="正在截图，请耐心等待"
+        android:textColor="#fff"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="@id/idBack"
+        app:layout_constraintBottom_toBottomOf="@id/idBack"
+        style="@style/TextAppearance.AppCompat.Title"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView"

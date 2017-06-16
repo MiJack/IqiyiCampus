@@ -2,6 +2,7 @@ package cn.mijack.meme.ui;
 
 
 import android.Manifest;
+import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -24,6 +25,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
+import android.support.transition.AutoTransition;
+import android.support.transition.Transition;
 import android.support.transition.TransitionManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -56,6 +59,8 @@ import java.util.concurrent.TimeUnit;
 import cn.mijack.meme.BuildConfig;
 import cn.mijack.meme.R;
 import cn.mijack.meme.base.BaseActivity;
+import cn.mijack.meme.dao.HistoryDatabase;
+import cn.mijack.meme.model.HistoryEntity;
 import cn.mijack.meme.model.VideoInfo;
 import cn.mijack.meme.utils.LogUtils;
 import cn.mijack.meme.utils.Utils;
@@ -180,12 +185,20 @@ public class PlayerActivity extends BaseActivity {
     };
     private VideoInfo videoInfo;
     private RecyclerView recyclerView;
+    HistoryDatabase db;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         if (intent == null || intent.hasExtra("video") == false) {
+            finish();
+            return;
+        }
+        db = Room.databaseBuilder(getApplicationContext(),
+                HistoryDatabase.class, "database-name").allowMainThreadQueries().build();
+        videoInfo = (VideoInfo) intent.getSerializableExtra("video");
+        if (videoInfo == null) {
             finish();
             return;
         }
@@ -204,6 +217,7 @@ public class PlayerActivity extends BaseActivity {
         mCurrentTime = (TextView) findViewById(R.id.id_current_time);
         mTotalTime = (TextView) findViewById(R.id.id_total_time);
         controlBack = (LinearLayout) findViewById(R.id.controlBack);
+        mPlayPauseView = (ImageView) findViewById(R.id.idPlayPause);
         mFullScreenView = (ImageView) findViewById(R.id.id_full_screen);
         mConstraintLayout = (ConstraintLayout) findViewById(R.id.activity_main);
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
@@ -240,7 +254,36 @@ public class PlayerActivity extends BaseActivity {
         mMemeButton.setOnClickListener(v -> {
             pauseVideo();
             //todo add listener
-            TransitionManager.beginDelayedTransition(mConstraintLayout);
+            Transition sDefaultTransition = new AutoTransition();
+
+            sDefaultTransition.addListener(new Transition.TransitionListener() {
+                @Override
+                public void onTransitionStart(@NonNull Transition transition) {
+                    Log.d(TAG, "onTransitionStart: ");
+                }
+
+                @Override
+                public void onTransitionEnd(@NonNull Transition transition) {
+                    mMainHandler.postDelayed(() -> capture(), 300);
+                    Log.d(TAG, "onTransitionEnd: ");
+                }
+
+                @Override
+                public void onTransitionCancel(@NonNull Transition transition) {
+                    Log.d(TAG, "onTransitionCancel: ");
+                }
+
+                @Override
+                public void onTransitionPause(@NonNull Transition transition) {
+                    Log.d(TAG, "onTransitionPause: ");
+                }
+
+                @Override
+                public void onTransitionResume(@NonNull Transition transition) {
+                    Log.d(TAG, "onTransitionResume: ");
+                }
+            });
+            TransitionManager.beginDelayedTransition(mConstraintLayout, sDefaultTransition);
             ConstraintSet constraintSet = new ConstraintSet();
             constraintSet.clone(this, R.layout.activity_player_meme);
             constraintSet.applyTo(mConstraintLayout);
@@ -248,12 +291,11 @@ public class PlayerActivity extends BaseActivity {
             getWindowManager().getDefaultDisplay().getMetrics(metric);
             int width = metric.widthPixels - getResources().getDimensionPixelOffset(R.dimen.videoViewMargin) * 2;
             int height = (int) (width * 9.0 / 16);
-            mVideoView.setVideoViewSize(width,height);
-//            controlBack.setVisibility(View.GONE);
+            mVideoView.setVideoViewSize(width, height);
+            controlBack.setVisibility(View.GONE);
 //            if (mImageReader == null) {
 //                startActivityForResult(mMediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
 //            } else {
-////            mImageReader.close();
 //                handlerImage(mImageReader.acquireLatestImage());
 //            }
         });
@@ -334,8 +376,10 @@ public class PlayerActivity extends BaseActivity {
             mediaProjection.stop();
         }
         mMainHandler.removeCallbacksAndMessages(null);
-        mVideoView.release();
-        mVideoView = null;
+        if (mVideoView != null) {
+            mVideoView.release();
+            mVideoView = null;
+        }
         getContentResolver().unregisterContentObserver(rotationObserver);
     }
 
@@ -349,11 +393,21 @@ public class PlayerActivity extends BaseActivity {
         int progress = mVideoView.getCurrentPosition();
         LogUtils.d(TAG, "HANDLER_MSG_UPDATE_PROGRESS, duration = " + duration + ", currentPosition = " + progress);
         if (duration > 0) {
+            HistoryEntity entity = new HistoryEntity(videoInfo.id, videoInfo.title, videoInfo.img, videoInfo.aId, videoInfo.tId,
+                    System.currentTimeMillis(), progress, duration);
+            db.historyDao().insertHistory(entity);
+        }
+        if (duration > 0) {
             mSeekBar.setMax(duration);
             mSeekBar.setProgress(progress);
 
             mTotalTime.setText(ms2hms(duration));
             mCurrentTime.setText(ms2hms(progress));
+        }
+        if (mVideoView.isPlaying()) {
+            mPlayPauseView.setImageResource(R.drawable.ic_pause);
+        } else {
+            mPlayPauseView.setImageResource(R.drawable.ic_play_arrow);
         }
     }
 
@@ -370,7 +424,7 @@ public class PlayerActivity extends BaseActivity {
         return result;
     }
 
-    public void capture(View view) {
+    public void capture() {
         //请求读取权限
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
@@ -443,13 +497,13 @@ public class PlayerActivity extends BaseActivity {
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
                     mImageReader.getSurface(), null, null);
 //            mImageReader.setOnImageAvailableListener(this, null);
-            new Handler().postDelayed(() -> handlerImage(mImageReader.acquireLatestImage()), 50);
+            mMainHandler.postDelayed(() -> handlerImage(mImageReader.acquireLatestImage()), 50);
         }
     }
 
     private void handlerImage(Image image) {
         if (image == null) {
-            new Handler().postDelayed(() -> handlerImage(mImageReader.acquireLatestImage()), 50);
+            mMainHandler.postDelayed(() -> handlerImage(mImageReader.acquireLatestImage()), 50);
         }
         new Thread(() -> {
 
@@ -480,7 +534,6 @@ public class PlayerActivity extends BaseActivity {
                 e.printStackTrace();
             }
             System.out.println("ok");
-            saveBitmapFile(bitmap);
             DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
             String png = "myscreen_" + dateFormat.format(new Date(System.currentTimeMillis())) + ".png";
             try {
@@ -493,39 +546,6 @@ public class PlayerActivity extends BaseActivity {
             startActivity(intent);
             image.close();
         }).start();
-    }
-
-    private void saveBitmapFile(Bitmap bitmap) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-        String filePath = getExternalFilesDir(null).getAbsolutePath() + "/screenshots/" + "myscreen_" + dateFormat.format(new Date(System.currentTimeMillis())) + ".png";
-        // write bitmap to a file
-        File file = new File(filePath);
-        FileOutputStream fos = null;
-        try {
-            File parentFile = file.getParentFile();
-            parentFile.mkdirs();
-            file.createNewFile();
-            fos = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            System.out.println("insertImage:" + filePath);
-            Log.e(TAG, "captured image: " + file.getAbsolutePath());
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        try {
-            MediaStore.Images.Media.insertImage(getContentResolver(), file.getAbsolutePath(), file.getName(), null);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
     }
 
     private void setUpView() {
