@@ -10,7 +10,6 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import cn.mijack.meme.R;

@@ -11,6 +11,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -32,10 +33,10 @@ public class MemeActivity extends BaseActivity {
     private static final int SPAN_COUNT = 8;
     VideoInfo videoInfo;
     private long progess;
-    RecyclerView recyclerView;
+//    RecyclerView recyclerView;
     private GridLayoutManager layoutManager;
     private MemeViewModel memeViewModel;
-    private EmojiAdapter emojiAdapter;
+//    private EmojiAdapter emojiAdapter;
     private EmojiPageAdapter emojiPageAdapter;
 
     private Observer<ApiResponse<Result<List<Emoji>>>> observer = emojiResult -> {
@@ -44,7 +45,7 @@ public class MemeActivity extends BaseActivity {
             return;
         }
         List<Emoji> data = emojiResult.body.getData();
-        emojiAdapter.setData(data);
+//        emojiAdapter.setData(data);
         emojiPageAdapter.setEmojis(data);
     };
     private ViewPager viewPager;
@@ -55,7 +56,7 @@ public class MemeActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meme);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+//        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -70,11 +71,19 @@ public class MemeActivity extends BaseActivity {
         videoInfo = (VideoInfo) intent.getSerializableExtra("videoInfo");
         progess = intent.getLongExtra("progress", -1);
         layoutManager = new GridLayoutManager(this, SPAN_COUNT, GridLayoutManager.HORIZONTAL, false);
-        recyclerView.setLayoutManager(layoutManager);
-        emojiAdapter = new EmojiAdapter();
-        recyclerView.setAdapter(emojiAdapter);
+//        recyclerView.setLayoutManager(layoutManager);
+//        emojiAdapter = new EmojiAdapter();
+//        recyclerView.setAdapter(emojiAdapter);
         emojiPageAdapter = new EmojiPageAdapter(getSupportFragmentManager());
         viewPager.setAdapter(emojiPageAdapter);
+
+        final ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
+        layoutParams.width = ViewPager.LayoutParams.MATCH_PARENT;
+        layoutParams.height = ViewPager.LayoutParams.WRAP_CONTENT;
+        layoutParams.gravity = Gravity.BOTTOM;
+
+//        final ViewPagerIndicator viewPagerIndicator = new ViewPagerIndicator(context);
+//        viewPager.addView(viewPagerIndicator, layoutParams);
         memeViewModel.loadEmoji().observe(this,observer);
         String bitmap = intent.getStringExtra("image");
         new AsyncTask<String, Void, Bitmap>() {

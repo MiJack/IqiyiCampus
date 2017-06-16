@@ -59,4 +59,5 @@ dependencies {
     compile project(':apilib')
     implementation 'com.android.support:design:25.3.1'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.github.ronaldsmartin:Material-ViewPagerIndicator:1.0.4'
 }
