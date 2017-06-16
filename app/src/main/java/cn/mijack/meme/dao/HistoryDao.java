@@ -1,5 +1,6 @@
 package cn.mijack.meme.dao;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
@@ -20,5 +21,5 @@ public interface HistoryDao {
 
 
     @Query("SELECT * FROM history")
-    List<HistoryEntity> loadAllHistory();
+    LiveData<List<HistoryEntity>> loadAllHistory();
 }

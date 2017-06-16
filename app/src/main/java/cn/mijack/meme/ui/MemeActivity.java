@@ -28,6 +28,7 @@ import cn.mijack.meme.model.VideoInfo;
 import cn.mijack.meme.remote.ApiResponse;
 import cn.mijack.meme.remote.Result;
 import cn.mijack.meme.vm.MemeViewModel;
+import me.relex.circleindicator.CircleIndicator;
 
 public class MemeActivity extends BaseActivity {
     private static final int SPAN_COUNT = 8;
@@ -76,7 +77,10 @@ public class MemeActivity extends BaseActivity {
 //        recyclerView.setAdapter(emojiAdapter);
         emojiPageAdapter = new EmojiPageAdapter(getSupportFragmentManager());
         viewPager.setAdapter(emojiPageAdapter);
-
+        CircleIndicator indicator = (CircleIndicator) findViewById(R.id.indicator);
+//        viewpager.setAdapter(mPageAdapter);
+        indicator.setViewPager(viewPager);
+        emojiPageAdapter.registerDataSetObserver(indicator.getDataSetObserver());
         final ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
         layoutParams.width = ViewPager.LayoutParams.MATCH_PARENT;
         layoutParams.height = ViewPager.LayoutParams.WRAP_CONTENT;

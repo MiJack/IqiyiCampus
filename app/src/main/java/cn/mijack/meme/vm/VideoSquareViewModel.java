@@ -19,14 +19,14 @@ public class VideoSquareViewModel extends BaseViewModel {
     @UiThread
     public LiveData<ApiResponse<RecommendEntity>> getRecommendDetail(Context context) {
         if (recommendDetailData == null) {
-            recommendDetailData = iqiyiApiService.recommendDetail(ApiParamsGen.genRecommendDetailParams(context, 0, DEFAULT_PAGE_SIZE));
+            recommendDetailData = getIqiyiApiService().recommendDetail(ApiParamsGen.genRecommendDetailParams(context, 0, DEFAULT_PAGE_SIZE));
         }
         return recommendDetailData;
     }
 
     @UiThread
     public LiveData<ApiResponse<RecommendEntity>> reloadRecommendDetail(Context context) {
-        recommendDetailData = iqiyiApiService.recommendDetail(ApiParamsGen.genRecommendDetailParams(context, 0, DEFAULT_PAGE_SIZE));
+        recommendDetailData = getIqiyiApiService().recommendDetail(ApiParamsGen.genRecommendDetailParams(context, 0, DEFAULT_PAGE_SIZE));
         return recommendDetailData;
     }
 }

@@ -27,12 +27,12 @@ public class HistoryEntity {
     private long updateTime;
 
     private long progress;
-    private int duration;
+    private long duration;
 
     public HistoryEntity() {
     }
 
-    public HistoryEntity(String videoId, String title, String img, String aId, String tId, long updateTime, long progress, int duration) {
+    public HistoryEntity(String videoId, String title, String img, String aId, String tId, long updateTime, long progress, long duration) {
         this.vId = videoId;
         this.title = title;
         this.img = img;
@@ -100,11 +100,11 @@ public class HistoryEntity {
         this.progress = progress;
     }
 
-    public int getDuration() {
+    public long getDuration() {
         return duration;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(long duration) {
         this.duration = duration;
     }
 }

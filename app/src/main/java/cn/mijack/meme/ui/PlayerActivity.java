@@ -41,6 +41,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.util.Util;
 import com.iqiyi.player.nativemediaplayer.MediaPlayerState;
 import com.qiyi.video.playcore.ErrorCode;
 import com.qiyi.video.playcore.IQYPlayerHandlerCallBack;
@@ -398,27 +399,14 @@ public class PlayerActivity extends BaseActivity {
             mSeekBar.setMax(duration);
             mSeekBar.setProgress(progress);
 
-            mTotalTime.setText(ms2hms(duration));
-            mCurrentTime.setText(ms2hms(progress));
+            mTotalTime.setText(Utils.formatTime(duration));
+            mCurrentTime.setText(Utils.formatTime(progress));
         }
         if (mVideoView.isPlaying()) {
             mPlayPauseView.setImageResource(R.drawable.ic_pause);
         } else {
             mPlayPauseView.setImageResource(R.drawable.ic_play_arrow);
         }
-    }
-
-    /**
-     * Convert ms to hh:mm:ss
-     *
-     * @param millis
-     * @return
-     */
-    private String ms2hms(int millis) {
-        String result = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millis),
-                TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
-                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
-        return result;
     }
 
     public void capture() {
@@ -502,9 +490,9 @@ public class PlayerActivity extends BaseActivity {
     private void handlerImage(Image image) {
         if (image == null) {
             mMainHandler.postDelayed(() -> handlerImage(mImageReader.acquireLatestImage()), 50);
+            return;
         }
         new Thread(() -> {
-
             DisplayMetrics metric = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(metric);
             int width = metric.widthPixels;

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Mr.Yuan
@@ -62,5 +63,18 @@ public class Utils {
             e.printStackTrace();
         }
         context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file.getAbsolutePath())));
+    }
+
+    /**
+     * Convert ms to hh:mm:ss
+     *
+     * @param millis
+     * @return
+     */
+    public static String formatTime(long millis) {
+        String result = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millis),
+                TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
+                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
+        return result;
     }
 }

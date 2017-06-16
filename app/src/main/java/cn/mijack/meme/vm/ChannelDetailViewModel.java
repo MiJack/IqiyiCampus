@@ -22,7 +22,7 @@ public class ChannelDetailViewModel extends BaseViewModel {
             Map<String, String> channelDetailParams =
                     ApiParamsGen.genChannelDetailParams(
                             context, channelId, channelName, 0, DEFAULT_PAGE_SIZE);
-            liveData = iqiyiApiService.channelDetail(channelDetailParams);
+            liveData = getIqiyiApiService().channelDetail(channelDetailParams);
         }
         return liveData;
     }
@@ -36,6 +36,6 @@ public class ChannelDetailViewModel extends BaseViewModel {
         Map<String, String> channelDetailParams =
                 ApiParamsGen.genChannelDetailParams(
                         context, channelId, channelName, pageIndex, DEFAULT_PAGE_SIZE);
-        return iqiyiApiService.channelDetail(channelDetailParams);
+        return getIqiyiApiService().channelDetail(channelDetailParams);
     }
 }

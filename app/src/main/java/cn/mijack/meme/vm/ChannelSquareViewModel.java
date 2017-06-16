@@ -17,7 +17,7 @@ public class ChannelSquareViewModel extends BaseViewModel {
 
     public LiveData<ApiResponse<ChannelEntity>> loadChannels(Context context) {
         if (channelData == null) {
-            channelData = iqiyiApiService.channelList(ApiParamsGen.genChannelParams(context));
+            channelData = getIqiyiApiService().channelList(ApiParamsGen.genChannelParams(context));
         }
         return channelData;
     }

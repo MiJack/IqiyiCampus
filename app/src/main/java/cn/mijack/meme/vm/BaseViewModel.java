@@ -12,8 +12,8 @@ import cn.mijack.meme.remote.RetrofitClient;
  */
 public class BaseViewModel extends ViewModel {
     public static final int DEFAULT_PAGE_SIZE = 30;
-    protected IqiyiApiService iqiyiApiService;
-    protected ApiService apiService;
+    private IqiyiApiService iqiyiApiService;
+    private ApiService apiService;
 
     public BaseViewModel() {
         RetrofitClient client = RetrofitClient.getInstance();

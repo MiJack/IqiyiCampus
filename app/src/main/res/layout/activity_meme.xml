@@ -89,6 +89,7 @@
             android:id="@+id/viewPager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            tools:layout_height="120dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             android:layout_marginLeft="8dp"
@@ -98,6 +99,17 @@
             app:layout_constraintTop_toBottomOf="@+id/divider1"
             app:layout_constraintDimensionRatio="3:2" />
 
+        <me.relex.circleindicator.CircleIndicator
+            android:id="@+id/indicator"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            app:ci_drawable="@drawable/ic_circle_indicator_select"
+            app:ci_drawable_unselected="@drawable/ic_circle_indicator_unselect"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"/>
     </android.support.constraint.ConstraintLayout>
 
 </android.support.design.widget.CoordinatorLayout>

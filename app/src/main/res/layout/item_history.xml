@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
+
+    <TextView
+        android:id="@+id/tvDate"
+        style="@style/TextAppearance.AppCompat.Headline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="2017年3月1日" />
+
+    <ImageView
+        android:id="@+id/videoImage"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
+        android:layout_marginTop="8dp"
+        android:src="#333"
+        app:layout_constraintDimensionRatio="w,16:9"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvDate"
+        app:layout_goneMarginTop="0dp"
+        tools:layout_editor_absoluteX="16dp" />
+
+    <TextView
+        android:id="@+id/videoTitle"
+        style="@style/TextAppearance.AppCompat.Title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/videoImage"
+        app:layout_constraintTop_toTopOf="@+id/videoImage"
+        tools:text="TextView" />
+
+
+    <ProgressBar
+        android:id="@+id/videoProgress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:max="100"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="0dp"
+        android:minHeight="0dp"
+        app:layout_constraintEnd_toEndOf="@+id/videoImage"
+        app:layout_constraintStart_toStartOf="@+id/videoImage"
+        app:layout_constraintTop_toBottomOf="@+id/videoImage" />
+
+    <TextView
+        android:id="@+id/tvVideoPlayStatue"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/videoProgress"
+        app:layout_constraintLeft_toLeftOf="@+id/videoTitle"
+        tools:text="TextView" />
+
+    <TextView
+        android:id="@+id/tvVideoPlayTime"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/videoProgress"
+        app:layout_constraintLeft_toRightOf="@id/tvVideoPlayStatue"
+        app:layout_constraintRight_toRightOf="parent"
+        tools:text="TextView" />
+
+</android.support.constraint.ConstraintLayout>
