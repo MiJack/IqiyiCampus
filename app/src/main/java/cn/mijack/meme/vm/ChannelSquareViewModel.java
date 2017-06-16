@@ -11,13 +11,13 @@ import cn.mijack.meme.remote.ApiResponse;
  * @author Mr.Yuan
  * @date 2017/6/3
  */
-public class ChannelSquareViewModel extends MemeViewModel {
+public class ChannelSquareViewModel extends BaseViewModel {
     private LiveData<ApiResponse<ChannelEntity>> channelData;
 
 
     public LiveData<ApiResponse<ChannelEntity>> loadChannels(Context context) {
         if (channelData == null) {
-            channelData = apiService.channelList(ApiParamsGen.genChannelParams(context));
+            channelData = iqiyiApiService.channelList(ApiParamsGen.genChannelParams(context));
         }
         return channelData;
     }

@@ -20,14 +20,95 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_meme" />
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize">
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        <ImageView
+            android:id="@+id/memeView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="H,16:9"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:background="#000" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:id="@+id/view"
+            app:layout_constraintTop_toBottomOf="@+id/memeView"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/btnText"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_short_text_black_24dp"
+                app:layout_constraintBottom_toTopOf="@+id/barrier1"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/memeView" />
+
+            <EditText
+                android:id="@+id/editText"
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                app:layout_constraintBottom_toBottomOf="@+id/btnText"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/btnText"
+                app:layout_constraintTop_toTopOf="@+id/btnText" />
+
+        </LinearLayout>
+        <View
+            android:id="@+id/divider1"
+            android:layout_width="match_parent"
+            app:layout_constraintTop_toBottomOf="@+id/view"
+            android:layout_height="8px"
+            android:background="#eee" />
+        <ImageView
+            android:id="@+id/btnEmoji"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/ic_emoji"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/divider1" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            android:layout_marginRight="8dp"
+            android:layout_marginLeft="8dp"
+            app:layout_constraintLeft_toRightOf="@id/btnEmoji"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btnEmoji"
+            app:layout_constraintTop_toBottomOf="@+id/divider1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="8dp" />
+        <android.support.v4.view.ViewPager
+            android:id="@+id/viewPager"
+            app:layout_constraintLeft_toRightOf="@id/btnEmoji"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btnEmoji"
+            app:layout_constraintTop_toBottomOf="@+id/divider1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginLeft="8dp"/>
+
+    </android.support.constraint.ConstraintLayout>
 
 </android.support.design.widget.CoordinatorLayout>

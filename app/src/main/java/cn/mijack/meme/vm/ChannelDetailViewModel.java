@@ -14,7 +14,7 @@ import cn.mijack.meme.remote.ApiResponse;
  * @author Mr.Yuan
  * @date 2017/6/3
  */
-public class ChannelDetailViewModel extends MemeViewModel {
+public class ChannelDetailViewModel extends BaseViewModel {
     MutableLiveData<ApiResponse<ChannelDetailEntity>> liveData;
 
     public MutableLiveData<ApiResponse<ChannelDetailEntity>> loadChannel(Context context, String channelId, String channelName) {
@@ -22,7 +22,7 @@ public class ChannelDetailViewModel extends MemeViewModel {
             Map<String, String> channelDetailParams =
                     ApiParamsGen.genChannelDetailParams(
                             context, channelId, channelName, 0, DEFAULT_PAGE_SIZE);
-            liveData = apiService.channelDetail(channelDetailParams);
+            liveData = iqiyiApiService.channelDetail(channelDetailParams);
         }
         return liveData;
     }
@@ -36,6 +36,6 @@ public class ChannelDetailViewModel extends MemeViewModel {
         Map<String, String> channelDetailParams =
                 ApiParamsGen.genChannelDetailParams(
                         context, channelId, channelName, pageIndex, DEFAULT_PAGE_SIZE);
-        return apiService.channelDetail(channelDetailParams);
+        return iqiyiApiService.channelDetail(channelDetailParams);
     }
 }

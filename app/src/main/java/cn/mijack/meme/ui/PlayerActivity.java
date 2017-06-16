@@ -19,7 +19,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -46,10 +45,7 @@ import com.iqiyi.player.nativemediaplayer.MediaPlayerState;
 import com.qiyi.video.playcore.ErrorCode;
 import com.qiyi.video.playcore.IQYPlayerHandlerCallBack;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -80,6 +76,7 @@ public class PlayerActivity extends BaseActivity {
     private static final int REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 1;
     private static final int REQUEST_MEDIA_PROJECTION = 2;
     private static final int REQUEST_CODE_CHANGE_PERMISSION = 3;
+    private static final int REQUEST_CODE_UPLOAD_MEME = 4;
 
     private MemeVideoView mVideoView;
     private SeekBar mSeekBar;
@@ -479,6 +476,7 @@ public class PlayerActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //todo 添加了返回的调用
         if (requestCode == REQUEST_MEDIA_PROJECTION) {
             if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "授权失败", Toast.LENGTH_SHORT).show();
@@ -543,7 +541,7 @@ public class PlayerActivity extends BaseActivity {
             }
             Intent intent = new Intent(this, MemeActivity.class);
             intent.putExtra("image", png);
-            startActivity(intent);
+            startActivityForResult(intent, REQUEST_CODE_UPLOAD_MEME);
             image.close();
         }).start();
     }

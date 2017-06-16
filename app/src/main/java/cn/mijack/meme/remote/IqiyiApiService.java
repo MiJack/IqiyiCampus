@@ -24,32 +24,32 @@ import retrofit2.http.QueryMap;
  * @change by Yuan Yujie
  */
 public interface IqiyiApiService {
-    /**
-     * 获取频道列表接口
-     *
-     * @param params
-     * @return
-     */
-    @GET("channel")
-    Observable<ChannelEntity> qiyiChannelList(@QueryMap Map<String, String> params);
-
-    /**
-     * 获取频道详情接口
-     *
-     * @param params
-     * @return
-     */
-    @GET("channel")
-    Observable<ChannelDetailEntity> qiyiChannelDetail(@QueryMap Map<String, String> params);
-
-    /**
-     * 获取推荐页数据接口
-     *
-     * @param params
-     * @return
-     */
-    @GET("recommend")
-    Observable<RecommendEntity> qiyiRecommendDetail(@QueryMap Map<String, String> params);
+//    /**
+//     * 获取频道列表接口
+//     *
+//     * @param params
+//     * @return
+//     */
+//    @GET("channel")
+//    Observable<ChannelEntity> qiyiChannelList(@QueryMap Map<String, String> params);
+//
+//    /**
+//     * 获取频道详情接口
+//     *
+//     * @param params
+//     * @return
+//     */
+//    @GET("channel")
+//    Observable<ChannelDetailEntity> qiyiChannelDetail(@QueryMap Map<String, String> params);
+//
+//    /**
+//     * 获取推荐页数据接口
+//     *
+//     * @param params
+//     * @return
+//     */
+//    @GET("recommend")
+//    Observable<RecommendEntity> qiyiRecommendDetail(@QueryMap Map<String, String> params);
 
     /**
      * 获取推荐页数据接口

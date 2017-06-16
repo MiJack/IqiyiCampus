@@ -2,6 +2,8 @@ package cn.mijack.meme.remote;
 
 
 import com.facebook.stetho.okhttp3.StethoInterceptor;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -70,13 +72,16 @@ public class RetrofitClient {
 
 
     private void createRetrofit(OkHttpClient httpclient) {
+        Gson gson =new GsonBuilder()
+                .serializeNulls()
+                .create();
         retrofit = new Retrofit.Builder()
                 .baseUrl(host)
                 .client(httpclient)
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addCallAdapterFactory(new LiveDataCallAdapterFactory())
                 .addCallAdapterFactory(new MutableLiveDataCallAdapterFactory())
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
     }
 

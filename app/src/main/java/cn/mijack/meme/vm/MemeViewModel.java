@@ -1,20 +1,25 @@
 package cn.mijack.meme.vm;
 
-import android.arch.lifecycle.ViewModel;
+import android.arch.lifecycle.LiveData;
 
-import cn.mijack.meme.remote.IqiyiApiService;
-import cn.mijack.meme.remote.RetrofitClient;
+import java.util.List;
+
+import cn.mijack.meme.model.Emoji;
+import cn.mijack.meme.remote.ApiResponse;
+import cn.mijack.meme.remote.Result;
 
 /**
- * @author Mr.Yuan
- * @date 2017/6/4
+ * @author admin
+ * @date 2017/6/16
  */
-public class MemeViewModel extends ViewModel {
-    public static final int DEFAULT_PAGE_SIZE = 30;
-    protected IqiyiApiService apiService;
 
-    public MemeViewModel() {
-        RetrofitClient client = RetrofitClient.getInstance();
-        apiService = client.createApi(IqiyiApiService.class);
+public class MemeViewModel extends BaseViewModel {
+    LiveData<ApiResponse<Result<List<Emoji>>>> emojiLiveData;
+
+    public LiveData<ApiResponse<Result<List<Emoji>>>> loadEmoji() {
+        if (emojiLiveData == null) {
+            emojiLiveData = getApiService().listEmoji();
+        }
+        return emojiLiveData;
     }
 }

@@ -31,6 +31,7 @@ import retrofit2.Response;
  */
 public class ApiResponse<T> {
     public final int code;
+    private String msg;
     @Nullable
     public final T body;
     @Nullable
