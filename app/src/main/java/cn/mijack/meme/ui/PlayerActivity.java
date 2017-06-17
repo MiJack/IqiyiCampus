@@ -416,47 +416,48 @@ public class PlayerActivity extends BaseActivity {
 
     public void capture() {
         //请求读取权限
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                new AlertDialog.Builder(this).setTitle("请求权限")
-                        .setTitle("截图保持在SD卡中，需要存储权限，请前往设置打开权限重试")
-                        .setCancelable(false)
-                        .setPositiveButton("确定", (dialog, which) -> {
-                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                            Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
-                            intent.setData(uri);
-                            startActivityForResult(intent, REQUEST_CODE_CHANGE_PERMISSION);
-                            dialog.dismiss();
-                        })
-                        .setNegativeButton("取消", (dialog, which) -> Toast.makeText(PlayerActivity.this, "权限请求失败，无法截图", Toast.LENGTH_SHORT).show()).create().show();
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
-            }
-        } else {
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+//            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+//                new AlertDialog.Builder(this).setTitle("请求权限")
+//                        .setTitle("截图保持在SD卡中，需要存储权限，请前往设置打开权限重试")
+//                        .setCancelable(false)
+//                        .setPositiveButton("确定", (dialog, which) -> {
+//                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+//                            Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
+//                            intent.setData(uri);
+//                            startActivityForResult(intent, REQUEST_CODE_CHANGE_PERMISSION);
+//                            dialog.dismiss();
+//                        })
+//                        .setNegativeButton("取消", (dialog, which) -> Toast.makeText(PlayerActivity.this, "权限请求失败，无法截图", Toast.LENGTH_SHORT).show()).create().show();
+//            } else {
+//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
+//            }
+//        } else {
+            //todo fix bug 未授权前的请求
             captureImage();
-        }
+//        }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_CODE_CHANGE_PERMISSION) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-                captureImage();
-            } else {
-                new AlertDialog.Builder(this).setTitle("请求权限")
-                        .setTitle("截图保持在SD卡中，需要存储权限，请前往设置打开权限重试")
-                        .setCancelable(false)
-                        .setPositiveButton("确定", (dialog, which) -> {
-                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                            Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
-                            intent.setData(uri);
-                            startActivityForResult(intent, REQUEST_CODE_CHANGE_PERMISSION);
-                            dialog.dismiss();
-                        })
-                        .setNegativeButton("取消", (dialog, which) -> Toast.makeText(PlayerActivity.this, "权限请求失败，无法截图", Toast.LENGTH_SHORT).show()).create().show();
-            }
-        }
-    }
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        if (requestCode == REQUEST_CODE_CHANGE_PERMISSION) {
+//            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+//                captureImage();
+//            } else {
+//                new AlertDialog.Builder(this).setTitle("请求权限")
+//                        .setTitle("截图保持在SD卡中，需要存储权限，请前往设置打开权限重试")
+//                        .setCancelable(false)
+//                        .setPositiveButton("确定", (dialog, which) -> {
+//                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+//                            Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
+//                            intent.setData(uri);
+//                            startActivityForResult(intent, REQUEST_CODE_CHANGE_PERMISSION);
+//                            dialog.dismiss();
+//                        })
+//                        .setNegativeButton("取消", (dialog, which) -> Toast.makeText(PlayerActivity.this, "权限请求失败，无法截图", Toast.LENGTH_SHORT).show()).create().show();
+//            }
+//        }
+//    }
 
     private void captureImage() {
         if (mImageReader == null) {
@@ -572,7 +573,9 @@ public class PlayerActivity extends BaseActivity {
         } else if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             //恢复状态栏
             WindowManager.LayoutParams attrs = getWindow().getAttributes();
-            mVideoView.setVideoViewSize(screenWidth, (int) (screenWidth * 9.0 / 16));
+            try {
+                mVideoView.setVideoViewSize(screenWidth, (int) (screenWidth * 9.0 / 16));
+            }catch (Exception e){}
             attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow().setAttributes(attrs);
             recyclerView.setVisibility(View.VISIBLE);

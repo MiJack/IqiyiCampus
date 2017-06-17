@@ -1,6 +1,8 @@
 package cn.mijack.meme.utils;
 
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 
 /**
  * @author Mr.Yuan
@@ -10,16 +12,17 @@ import android.util.Log;
 public class LogUtils {
     private static String TAG = "LogUtils";
     public static boolean isDebug = ApiConstant.IS_DEBUG;
-    public static void e(String tag, String msg){
+
+    public static void e(String tag, String msg) {
         if (msg == null) {
             return;
         }
         if (ApiConstant.IS_DEBUG) {
-            Log.e(tag == null? TAG : tag, msg);
+            Log.e(tag == null ? TAG : tag, msg);
         }
     }
 
-    public static void i(String msg){
+    public static void i(String msg) {
         if (msg == null) {
             return;
         }
@@ -28,7 +31,7 @@ public class LogUtils {
         }
     }
 
-    public static void w(String msg){
+    public static void w(String msg) {
         if (msg == null) {
             return;
         }
@@ -37,7 +40,7 @@ public class LogUtils {
         }
     }
 
-    public static void d(String msg){
+    public static void d(String msg) {
         if (msg == null) {
             return;
         }
@@ -46,7 +49,7 @@ public class LogUtils {
         }
     }
 
-    public static void e(String msg){
+    public static void e(String msg) {
         if (msg == null) {
             return;
         }
@@ -55,30 +58,34 @@ public class LogUtils {
         }
     }
 
-    public static void i(String tag, String msg){
+    public static void i(String tag, String msg) {
         if (msg == null) {
             return;
         }
         if (ApiConstant.IS_DEBUG) {
-            Log.i(tag == null? TAG : tag, msg);
+            Log.i(tag == null ? TAG : tag, msg);
         }
     }
 
-    public static void w(String tag, String msg){
+    public static void w(String tag, String msg) {
         if (msg == null) {
             return;
         }
         if (ApiConstant.IS_DEBUG) {
-            Log.w(tag == null? TAG : tag, msg);
+            Log.w(tag == null ? TAG : tag, msg);
         }
     }
 
-    public static void d(String tag, String msg){
+    public static void d(String tag, String msg) {
         if (msg == null) {
             return;
         }
         if (ApiConstant.IS_DEBUG) {
-            Log.d(tag == null? TAG : tag, msg);
+            Log.d(tag == null ? TAG : tag, msg);
         }
+    }
+
+    public static void logView(String tag, View view) {
+        Log.d(TAG, tag + "\tl:" + view.getLeft() + "\tt:" + view.getTop() + "\tr:" + view.getRight() + "\tb:" + view.getBottom());
     }
 }

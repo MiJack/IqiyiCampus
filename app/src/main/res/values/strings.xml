@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Meme</string>
     <string name="copy_right"><![CDATA[Copy © Mi&Jack]]></string>
-
+    <string name="file_provider_authority" translatable="false">cn.mijack.meme.provider</string>
     <string name="nick_name">昵称</string>
     <string name="email">邮箱</string>
     <string name="password_is_empty">密码为空</string>
@@ -115,4 +115,9 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_activity_meme">制作Meme</string>
+    <string name="meme_dialog_title">请输入文字</string>
+    <string name="cancel">取消</string>
+    <string name="ok">确定</string>
+    <string name="error">请求异常</string>
+    <string name="dialog_title">正在生成中</string>
 </resources>

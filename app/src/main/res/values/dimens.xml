@@ -7,4 +7,6 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="videoViewMargin">96dp</dimen>
+    <dimen name="maxFontSize">120sp</dimen>
+    <dimen name="minFontSize">12sp</dimen>
 </resources>

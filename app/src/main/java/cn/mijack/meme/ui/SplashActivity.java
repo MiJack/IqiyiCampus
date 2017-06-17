@@ -27,9 +27,9 @@ public class SplashActivity extends BaseActivity {
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         new Handler().postDelayed(() -> {
 //            Intent intent = new Intent(SplashActivity.this, MainActivity.class);
-//            //myscreen_20170617001109.png
+            //myscreen_20170617001109.png
             Intent intent = new Intent(this, MemeActivity.class);
-            intent.putExtra("image", "myscreen_20170617105123.png");
+            intent.putExtra("image", "myscreen_20170617140310.png");
             startActivity(intent);
             finish();
         }, 2000);

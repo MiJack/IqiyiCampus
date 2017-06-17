@@ -1,33 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-
     <item
-        android:title="Item"
+        android:id="@+id/actionText"
         android:icon="@drawable/ic_text"
+        android:title="text"
         app:showAsAction="always" />
     <item
-        android:title="Item"
+        android:id="@+id/actionTextColor"
         android:icon="@drawable/ic_format_color_text"
+        android:title="text color"
         app:showAsAction="always" />
     <item
-        android:title="Item"
+        android:id="@+id/actionFontSizeDown"
         android:icon="@drawable/ic_font_size_down"
+        android:title="text size down"
         app:showAsAction="always" />
     <item
+        android:id="@+id/actionFontSizeUp"
         android:icon="@drawable/ic_font_size_up"
-        android:title="Item"
+        android:title="text size up"
         app:showAsAction="always" />
     <item
-        android:title="Item"
+        android:id="@+id/actionEmoji"
         android:icon="@drawable/ic_emoji"
+        android:title="emoji"
         app:showAsAction="always" />
     <item
-        android:title="Item"
+        android:id="@+id/actionEmojiSmaller"
+        android:icon="@drawable/ic_emoji_smaller"
+        android:title="emoji"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/actionEmojiBigger"
+        android:icon="@drawable/ic_emoji_bigger"
+        android:title="emoji"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/actionUpload"
         android:icon="@drawable/ic_cloud_upload"
+        android:title="upload"
         app:showAsAction="always" />
     <item
-        android:title="Item"
+        android:id="@+id/actionShare"
         android:icon="@drawable/ic_share"
+        android:title="share"
         app:showAsAction="always" />
 </menu>

@@ -35,12 +35,22 @@
         <activity android:name=".ui.VideoHistoryActivity" />
         <activity
             android:name=".ui.PlayerActivity"
-            android:configChanges="orientation|screenSize|layoutDirection"/>
+            android:configChanges="orientation|screenSize|layoutDirection" />
         <activity
             android:name=".ui.MemeActivity"
             android:label="@string/title_activity_meme"
             android:screenOrientation="landscape"
             android:theme="@style/AppTheme.NoActionBar"></activity>
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="@string/file_provider_authority"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_paths" />
+        </provider>
     </application>
 
 </manifest>

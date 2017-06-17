@@ -2,35 +2,41 @@
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:parentTag="android.support.constraint.ConstraintLayout">
+    android:orientation="vertical"
+    tools:parentTag="cn.mijack.meme.view.MemeView">
+
+
+    <ImageView
+        android:id="@+id/captureView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="55dp"
+        tools:layout_editor_absoluteY="124dp"
+        tools:src="#333" />
 
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:textColor="#000000"
+        android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:text="TextView"
+        app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteX="224dp"
         tools:layout_editor_absoluteY="210dp" />
 
     <ImageView
-        android:id="@+id/captureView"
-        android:layout_width="match_parent"
-        tools:src="#333"
-        android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="55dp"
-        tools:layout_editor_absoluteY="124dp" />
-    <ImageView
         android:id="@+id/emojiView"
-        android:layout_width="match_parent"
-        tools:src="#333"
-        android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="55dp"
-        tools:layout_editor_absoluteY="124dp" />
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="h,1:1"
+        tools:src="#333" />
 </merge>

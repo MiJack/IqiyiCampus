@@ -1,31 +1,41 @@
 package cn.mijack.meme.ui;
 
+import android.Manifest;
+import android.app.ProgressDialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
-import android.widget.ImageView;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
-import com.bumptech.glide.BitmapTypeRequest;
-import com.bumptech.glide.Glide;
-
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
+import cn.mijack.meme.BuildConfig;
 import cn.mijack.meme.R;
 import cn.mijack.meme.adapter.EmojiPageAdapter;
 import cn.mijack.meme.base.BaseActivity;
@@ -33,29 +43,33 @@ import cn.mijack.meme.model.Emoji;
 import cn.mijack.meme.model.VideoInfo;
 import cn.mijack.meme.remote.ApiResponse;
 import cn.mijack.meme.remote.Result;
+import cn.mijack.meme.utils.TextHelper;
 import cn.mijack.meme.utils.Utils;
+import cn.mijack.meme.view.ColorPickerDialog;
+import cn.mijack.meme.view.IntentSelectSheetDialogFragment;
 import cn.mijack.meme.view.MemeView;
 import cn.mijack.meme.vm.MemeViewModel;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import me.relex.circleindicator.CircleIndicator;
 
 public class MemeActivity extends BaseActivity {
     private static final int SPAN_COUNT = 8;
+    private static final int REQUEST_CODE_CHANGE_PERMISSION = 2;
+    private static final int REQUEST_CODE_SHARE = 3;
+    private static final int REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 1;
+    private static final int REQUEST_CODE_PICK_APPLICATION = 4;
     VideoInfo videoInfo;
     private long progess;
-    //    RecyclerView recyclerView;
     private GridLayoutManager layoutManager;
     private MemeViewModel memeViewModel;
-    //    private EmojiAdapter emojiAdapter;
     private EmojiPageAdapter emojiPageAdapter;
-
+    private DrawerLayout drawerLayout;
     private Observer<ApiResponse<Result<List<Emoji>>>> dataObserver = emojiResult -> {
         if (emojiResult == null) {
-            Toast.makeText(this, "请求异常", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.error, Toast.LENGTH_SHORT).show();
             return;
         }
         List<Emoji> data = emojiResult.body.getData();
@@ -69,6 +83,7 @@ public class MemeActivity extends BaseActivity {
             return;
         }
         memeView.setEmojiBitmapUrl(url);
+        drawerLayout.closeDrawer(Gravity.RIGHT);
     };
 
     @Override
@@ -76,7 +91,6 @@ public class MemeActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meme);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -90,12 +104,12 @@ public class MemeActivity extends BaseActivity {
 
         videoInfo = (VideoInfo) intent.getSerializableExtra("videoInfo");
         memeView = (MemeView) findViewById(R.id.memeView);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         progess = intent.getLongExtra("progress", -1);
         layoutManager = new GridLayoutManager(this, SPAN_COUNT, GridLayoutManager.HORIZONTAL, false);
         emojiPageAdapter = new EmojiPageAdapter(getSupportFragmentManager());
         viewPager.setAdapter(emojiPageAdapter);
         CircleIndicator indicator = (CircleIndicator) findViewById(R.id.indicator);
-//        viewpager.setAdapter(mPageAdapter);
         indicator.setViewPager(viewPager);
         emojiPageAdapter.registerDataSetObserver(indicator.getDataSetObserver());
         final ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
@@ -103,7 +117,7 @@ public class MemeActivity extends BaseActivity {
         layoutParams.height = ViewPager.LayoutParams.WRAP_CONTENT;
         layoutParams.gravity = Gravity.BOTTOM;
         memeViewModel.loadEmoji().observe(this, dataObserver);
-
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.RIGHT);
         memeViewModel.getEmojiUrlLiveData().observe(this, emojiObserver);
         String bitmap = intent.getStringExtra("image");
         Observable.just(bitmap)
@@ -117,7 +131,162 @@ public class MemeActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_meme,menu);
+        getMenuInflater().inflate(R.menu.menu_meme, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.actionText:
+                showInputTextDialog();
+                break;
+            case R.id.actionTextColor:
+                showColorPicker();
+                break;
+            case R.id.actionFontSizeDown:
+                memeView.makeFontSizeDown();
+                break;
+            case R.id.actionFontSizeUp:
+                memeView.makeFontSizeUp();
+                break;
+            case R.id.actionEmoji:
+                drawerLayout.openDrawer(Gravity.RIGHT);
+                break;
+            case R.id.actionEmojiSmaller:
+                memeView.makeEmojiSizeDown();
+                break;
+            case R.id.actionEmojiBigger:
+                memeView.makeEmojiSizeUp();
+                break;
+            case R.id.actionUpload:
+                break;
+            case R.id.actionShare:
+                checkPermissionAndShare();
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
+
+    private void checkPermissionAndShare() {
+        //请求读取权限
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                new AlertDialog.Builder(this).setTitle("请求权限")
+                        .setTitle("截图保持在SD卡中，需要存储权限，请前往设置打开权限重试")
+                        .setCancelable(false)
+                        .setPositiveButton("确定", (dialog, which) -> {
+                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
+                            intent.setData(uri);
+                            startActivityForResult(intent, REQUEST_CODE_CHANGE_PERMISSION);
+                            dialog.dismiss();
+                        })
+                        .setNegativeButton("取消", (dialog, which) -> Toast.makeText(MemeActivity.this, "权限请求失败，无法截图", Toast.LENGTH_SHORT).show()).create().show();
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
+            }
+        } else {
+            shareMeme();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_CHANGE_PERMISSION) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                shareMeme();
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_CODE_CHANGE_PERMISSION) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                shareMeme();
+            } else {
+                new AlertDialog.Builder(this).setTitle("请求权限")
+                        .setTitle("截图保持在SD卡中，需要存储权限，请前往设置打开权限重试")
+                        .setCancelable(false)
+                        .setPositiveButton("确定", (dialog, which) -> {
+                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
+                            intent.setData(uri);
+                            startActivityForResult(intent, REQUEST_CODE_CHANGE_PERMISSION);
+                            dialog.dismiss();
+                        })
+                        .setNegativeButton("取消", (dialog, which) -> Toast.makeText(MemeActivity.this, "权限请求失败，无法截图", Toast.LENGTH_SHORT).show()).create().show();
+            }
+        }
+    }
+
+    private AlertDialog dialog;
+
+    private void shareMeme() {
+        Observable.just(memeView)
+                .doOnNext(memeView -> {
+                    dialog = new AlertDialog.Builder(MemeActivity.this)
+                            .setCancelable(false)
+                            .setTitle(R.string.dialog_title)
+                            .setView(R.layout.progress_dialog)
+                            .create();
+                    dialog.show();
+                })
+                .observeOn(Schedulers.io())
+                .map(memeView -> Utils.getViewBp(memeView))
+                .map(bitmap -> Utils.saveBitmapFile(MemeActivity.this, bitmap))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(filePath -> {
+                    if (dialog != null) {
+                        dialog.cancel();
+                    }
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    Uri fileUri = FileProvider.getUriForFile(MemeActivity.this, getString(R.string.file_provider_authority), new File(filePath));
+                    intent.setDataAndType(fileUri, getContentResolver().getType(fileUri));
+                    intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    // First search for compatible apps with sharing (Intent.ACTION_SEND)
+                    ArrayList<ResolveInfo> targetedShareIntents = new ArrayList<ResolveInfo>();
+                    List<ResolveInfo> resInfo = getPackageManager().queryIntentActivities(intent, 0);
+                    if (!resInfo.isEmpty()) {
+                        targetedShareIntents.addAll(resInfo);
+                        IntentSelectSheetDialogFragment fragment =new IntentSelectSheetDialogFragment();
+                        Bundle args =new Bundle();
+                        args.putParcelableArrayList("intent",targetedShareIntents);
+                        fragment.setArguments(args);
+                        fragment.show(getSupportFragmentManager(),"fragment");
+                    }else{
+                        Toast.makeText(this, "无法分享", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void showInputTextDialog() {
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_meme_content, null);
+        EditText editText = (EditText) view.findViewById(R.id.editText);
+        editText.setText(memeView.getText());
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.meme_dialog_title)
+                .setView(view)
+                .setPositiveButton(R.string.ok, (dialog, which) -> {
+                    EditText e = (EditText) view.findViewById(R.id.editText);
+                    dialog.cancel();
+                    memeView.setText(TextHelper.getText(e));
+                })
+                .setNegativeButton(R.string.cancel, (dialog, which) -> {
+                    dialog.cancel();
+                })
+                .create().show();
+    }
+
+    private void showColorPicker() {
+        new ColorPickerDialog(this, memeView.getTextColor())
+                .setListener((alertDialog, rgb) -> {
+                    alertDialog.dismiss();
+                    memeView.setTextColor(rgb);
+                }).show();
     }
 }
