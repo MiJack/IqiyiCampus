@@ -3,14 +3,17 @@ package cn.mijack.meme.remote;
 import android.arch.lifecycle.LiveData;
 
 import java.util.List;
+import java.util.Map;
 
 import cn.mijack.meme.model.Emoji;
+import cn.mijack.meme.model.TokenEntity;
 import cn.mijack.meme.user.User;
 import io.reactivex.Observable;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Query;
 
 /**
  * @author Mr.Yuan
@@ -35,4 +38,8 @@ public interface ApiService {
 
     @GET(SERVER + "/listEmoji")
     LiveData<ApiResponse<Result<List<Emoji>>>> listEmoji();
+
+    @GET(SERVER + "/requestQiniuToken")
+//    http://develop.mijack.cn:8080/requestQiniuToken?uid=12&videoId=12&startTime=1212
+    Observable<Result<TokenEntity>> requestToken(@Query("uid") int uid, @Query("videoId") String vId, @Query("startTime") long progess);
 }

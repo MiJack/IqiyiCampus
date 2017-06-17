@@ -6,8 +6,10 @@ import android.arch.lifecycle.MutableLiveData;
 import java.util.List;
 
 import cn.mijack.meme.model.Emoji;
+import cn.mijack.meme.model.TokenEntity;
 import cn.mijack.meme.remote.ApiResponse;
 import cn.mijack.meme.remote.Result;
+import io.reactivex.Observable;
 
 /**
  * @author admin
@@ -35,5 +37,9 @@ public class MemeViewModel extends BaseViewModel {
 
     public LiveData<String> getEmojiUrlLiveData() {
         return emojiUrlLiveData;
+    }
+
+    public Observable<Result<TokenEntity>> requestToken(int uid, String vId, long progess) {
+        return getApiService().requestToken(uid,vId,progess);
     }
 }

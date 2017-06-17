@@ -1,19 +1,21 @@
 package cn.mijack.meme.ui;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewPager;
@@ -30,6 +32,16 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.qiniu.android.common.AutoZone;
+import com.qiniu.android.http.ResponseInfo;
+import com.qiniu.android.storage.Configuration;
+import com.qiniu.android.storage.UpCompletionHandler;
+import com.qiniu.android.storage.UploadManager;
+import com.qiniu.android.storage.UploadOptions;
+
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
@@ -43,26 +55,30 @@ import cn.mijack.meme.model.Emoji;
 import cn.mijack.meme.model.VideoInfo;
 import cn.mijack.meme.remote.ApiResponse;
 import cn.mijack.meme.remote.Result;
+import cn.mijack.meme.user.UserManager;
 import cn.mijack.meme.utils.TextHelper;
 import cn.mijack.meme.utils.Utils;
 import cn.mijack.meme.view.ColorPickerDialog;
 import cn.mijack.meme.view.IntentSelectSheetDialogFragment;
 import cn.mijack.meme.view.MemeView;
+import cn.mijack.meme.view.UploadDialog;
 import cn.mijack.meme.vm.MemeViewModel;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import me.relex.circleindicator.CircleIndicator;
 
 public class MemeActivity extends BaseActivity {
     private static final int SPAN_COUNT = 8;
-    private static final int REQUEST_CODE_CHANGE_PERMISSION = 2;
-    private static final int REQUEST_CODE_SHARE = 3;
-    private static final int REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 1;
-    private static final int REQUEST_CODE_PICK_APPLICATION = 4;
+    public static final int REQUEST_CODE_CHANGE_PERMISSION = 2;
+    public static final int REQUEST_CODE_SHARE = 3;
+    public static final int REQUEST_CODE_WRITE_EXTERNAL_STORAGE = 1;
+    public static final int REQUEST_CODE_PICK_APPLICATION = 4;
+    private static final String FRAGMENT = "fragment";
+    private static final int REQUEST_CODE_LOGIN = 5;
+    private static final String DIALOG = "dialog";
     VideoInfo videoInfo;
-    private long progess;
+    private int progess;
     private GridLayoutManager layoutManager;
     private MemeViewModel memeViewModel;
     private EmojiPageAdapter emojiPageAdapter;
@@ -85,10 +101,15 @@ public class MemeActivity extends BaseActivity {
         memeView.setEmojiBitmapUrl(url);
         drawerLayout.closeDrawer(Gravity.RIGHT);
     };
+    private Configuration config;
+    private UploadManager uploadManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        config = new Configuration.Builder().zone(AutoZone.autoZone).build();
+        uploadManager = new UploadManager(config);
+
         setContentView(R.layout.activity_meme);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         viewPager = (ViewPager) findViewById(R.id.viewPager);
@@ -105,7 +126,7 @@ public class MemeActivity extends BaseActivity {
         videoInfo = (VideoInfo) intent.getSerializableExtra("videoInfo");
         memeView = (MemeView) findViewById(R.id.memeView);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
-        progess = intent.getLongExtra("progress", -1);
+        progess = intent.getIntExtra("progress", -1);
         layoutManager = new GridLayoutManager(this, SPAN_COUNT, GridLayoutManager.HORIZONTAL, false);
         emojiPageAdapter = new EmojiPageAdapter(getSupportFragmentManager());
         viewPager.setAdapter(emojiPageAdapter);
@@ -160,6 +181,7 @@ public class MemeActivity extends BaseActivity {
                 memeView.makeEmojiSizeUp();
                 break;
             case R.id.actionUpload:
+                uploadImage();
                 break;
             case R.id.actionShare:
                 checkPermissionAndShare();
@@ -168,6 +190,62 @@ public class MemeActivity extends BaseActivity {
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    private void uploadImage() {
+        if (UserManager.get(this).isLogin()) {
+            uploadToQiniu();
+        } else {
+            showLoginDialog();
+        }
+    }
+
+    UploadDialog uploadDialog;
+
+    @NonNull
+    private void uploadToQiniu() {
+        memeViewModel.requestToken(UserManager.get(this).getUser().getUid(), videoInfo.tId, progess)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(token -> {
+                    uploadDialog = new UploadDialog(this);
+                    uploadDialog.showRequestToken();
+                })
+                .observeOn(Schedulers.io())
+                .map(resultApiResponse -> resultApiResponse.getData())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(s -> {
+                    Bitmap bmp = Utils.getViewBp(memeView);
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    byte[] byteArray = stream.toByteArray();
+                    //todo 优化线程
+                    uploadManager.put(byteArray, s.getKey(), s.getToken(), new UpCompletionHandler() {
+                        @Override
+                        public void complete(String key, ResponseInfo info, JSONObject response) {
+
+                        }
+                    }, new UploadOptions(null, null, true, null, null));
+                    System.out.println("token:" + s);
+                }, throwable -> {
+                    Toast.makeText(this, "上传失败", Toast.LENGTH_SHORT).show();
+                }, () -> {
+                    uploadDialog.dismiss();
+                });
+    }
+
+    private void showLoginDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("请登录")
+                .setMessage("上传图片需要登录")
+                .setPositiveButton("前往登录", (dialog, which) -> {
+                    Intent intent = new Intent(this, AccountActivity.class);
+                    startActivityForResult(intent, REQUEST_CODE_LOGIN);
+                    dialog.cancel();
+                })
+                .setNegativeButton(R.string.cancel, (dialog, which) -> {
+
+                }).create().show();
     }
 
     private void checkPermissionAndShare() {
@@ -199,6 +277,13 @@ public class MemeActivity extends BaseActivity {
         if (requestCode == REQUEST_CODE_CHANGE_PERMISSION) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 shareMeme();
+            }
+        }
+        if (requestCode == REQUEST_CODE_LOGIN) {
+            if (UserManager.get(this).isLogin()) {
+                uploadToQiniu();
+            } else {
+                Toast.makeText(this, "登录不成功，无法上传", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -244,21 +329,32 @@ public class MemeActivity extends BaseActivity {
                     if (dialog != null) {
                         dialog.cancel();
                     }
-                    Intent intent = new Intent(Intent.ACTION_SEND);
+
                     Uri fileUri = FileProvider.getUriForFile(MemeActivity.this, getString(R.string.file_provider_authority), new File(filePath));
-                    intent.setDataAndType(fileUri, getContentResolver().getType(fileUri));
-                    intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//                    intent.setDataAndType(fileUri, getContentResolver().getType(fileUri));
+                    Intent intent = ShareCompat.IntentBuilder.from(this)
+                            .setType(getContentResolver().getType(fileUri))
+                            .setStream(fileUri)
+                            .getIntent();
+                    intent.setData(fileUri);
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);//请求URI授权读取+
+                    intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);//
+//                    intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     // First search for compatible apps with sharing (Intent.ACTION_SEND)
-                    ArrayList<ResolveInfo> targetedShareIntents = new ArrayList<ResolveInfo>();
+                    ArrayList<ActivityInfo> activityInfos = new ArrayList<>();
                     List<ResolveInfo> resInfo = getPackageManager().queryIntentActivities(intent, 0);
                     if (!resInfo.isEmpty()) {
-                        targetedShareIntents.addAll(resInfo);
-                        IntentSelectSheetDialogFragment fragment =new IntentSelectSheetDialogFragment();
-                        Bundle args =new Bundle();
-                        args.putParcelableArrayList("intent",targetedShareIntents);
+                        for (ResolveInfo resolveInfo : resInfo) {
+                            activityInfos.add(resolveInfo.activityInfo);
+                        }
+                        IntentSelectSheetDialogFragment fragment = new IntentSelectSheetDialogFragment();
+                        Bundle args = new Bundle();
+                        args.putParcelable("intent", intent);
+                        args.putParcelableArrayList("activityInfos", activityInfos);
                         fragment.setArguments(args);
-                        fragment.show(getSupportFragmentManager(),"fragment");
-                    }else{
+                        fragment.show(getSupportFragmentManager(), FRAGMENT);
+                    } else {
                         Toast.makeText(this, "无法分享", Toast.LENGTH_SHORT).show();
                     }
                 });

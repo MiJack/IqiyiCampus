@@ -535,6 +535,8 @@ public class PlayerActivity extends BaseActivity {
             }
             Intent intent = new Intent(this, MemeActivity.class);
             intent.putExtra("image", png);
+            intent.putExtra("videoInfo",videoInfo);
+            intent.putExtra("progress",mVideoView.getCurrentPosition());
             startActivityForResult(intent, REQUEST_CODE_UPLOAD_MEME);
             image.close();
         }).start();

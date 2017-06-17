@@ -1,6 +1,8 @@
 package cn.mijack.meme.view;
 
 import android.app.Dialog;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
@@ -30,14 +32,13 @@ public class IntentSelectSheetDialogFragment extends BottomSheetDialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         BottomSheetDialog dialog = (BottomSheetDialog) super.onCreateDialog(savedInstanceState);
         View view = View.inflate(getContext(), R.layout.dialog_bottom_sheet, null);
-//        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
-//        layoutParams.setMargins(Utils.dipToPixels(getActivity(),90),0,Utils.dipToPixels(getActivity(),90),0);
-//        dialog.setContentView(view,layoutParams);
+        dialog.setContentView(view);
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 6));
-        List<ResolveInfo> resolveInfos = getArguments().getParcelableArrayList("intent");
+        List<ActivityInfo> resolveInfos = getArguments().getParcelableArrayList("activityInfos");
+        Intent intent = getArguments().getParcelable("intent");
         mBehavior = BottomSheetBehavior.from((View) view.getParent());
-        recyclerView.setAdapter(new ResolveInfoAdapter(resolveInfos, getActivity().getPackageManager()));
+        recyclerView.setAdapter(new ResolveInfoAdapter(getActivity(), resolveInfos, getActivity().getPackageManager(), intent, this));
         return dialog;
     }
 
@@ -48,7 +49,7 @@ public class IntentSelectSheetDialogFragment extends BottomSheetDialogFragment {
         mBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
-    public void doclick(View v) {
+    public void close() {
         //点击任意布局关闭
         mBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
