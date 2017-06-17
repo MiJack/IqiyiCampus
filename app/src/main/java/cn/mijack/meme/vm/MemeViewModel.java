@@ -1,6 +1,7 @@
 package cn.mijack.meme.vm;
 
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 
 import java.util.List;
 
@@ -15,11 +16,24 @@ import cn.mijack.meme.remote.Result;
 
 public class MemeViewModel extends BaseViewModel {
     LiveData<ApiResponse<Result<List<Emoji>>>> emojiLiveData;
+    private MutableLiveData<String> emojiUrlLiveData;
+
+    public MemeViewModel() {
+        emojiUrlLiveData = new MutableLiveData<>();
+    }
 
     public LiveData<ApiResponse<Result<List<Emoji>>>> loadEmoji() {
         if (emojiLiveData == null) {
             emojiLiveData = getApiService().listEmoji();
         }
         return emojiLiveData;
+    }
+
+    public void setEmojiUrl(String emojiUrl) {
+        emojiUrlLiveData.setValue(emojiUrl);
+    }
+
+    public LiveData<String> getEmojiUrlLiveData() {
+        return emojiUrlLiveData;
     }
 }

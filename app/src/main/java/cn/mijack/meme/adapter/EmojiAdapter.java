@@ -1,6 +1,8 @@
 package cn.mijack.meme.adapter;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,8 @@ import java.util.List;
 
 import cn.mijack.meme.R;
 import cn.mijack.meme.model.Emoji;
+import cn.mijack.meme.utils.Utils;
+import cn.mijack.meme.vm.MemeViewModel;
 
 /**
  * @author admin
@@ -22,6 +26,11 @@ import cn.mijack.meme.model.Emoji;
 
 public class EmojiAdapter extends RecyclerView.Adapter {
     List<Emoji> emojis = new ArrayList<>();
+    private FragmentActivity activity;
+
+    public EmojiAdapter(FragmentActivity activity) {
+        this.activity = activity;
+    }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
@@ -34,9 +43,13 @@ public class EmojiAdapter extends RecyclerView.Adapter {
         View itemView = viewHolder.itemView;
         Context context = itemView.getContext();
         Emoji emoji = emojis.get(position);
-        String url = emoji.getUrl() + "?imageView2/1/w/64/h/64";
+        String url = Utils.imageUrl(emoji.getUrl(),64,64);
         ImageView emojiView = (ImageView) itemView.findViewById(R.id.emojiView);
         Glide.with(context).load(url).into(emojiView);
+        viewHolder.itemView.setOnClickListener(v -> {
+            MemeViewModel memeViewModel = ViewModelProviders.of(activity).get(MemeViewModel.class);
+            memeViewModel.setEmojiUrl(emoji.getUrl());
+        });
     }
 
     @Override

@@ -77,4 +77,12 @@ public class Utils {
                 TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
         return result;
     }
+
+    public static String imageUrl(String url, int width, int height) {
+//        emoji.getUrl() + "?imageView2/1/w/64/h/64"
+        if (width <= 0 || height <= 0) {
+            return url;
+        }
+        return url+"?imageView2/1/w/"+width+"/h/"+height;
+    }
 }

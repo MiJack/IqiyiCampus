@@ -91,7 +91,7 @@ public class EmojiPageAdapter extends FragmentStatePagerAdapter {
         public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
             recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
-            EmojiAdapter emojiAdapter = new EmojiAdapter();
+            EmojiAdapter emojiAdapter = new EmojiAdapter(getActivity());
             emojiAdapter.setData(getArguments().getParcelableArrayList("data"));
             recyclerView.setAdapter(emojiAdapter);
             recyclerView.setLayoutManager(new NoScrollGridLayoutManager(recyclerView));

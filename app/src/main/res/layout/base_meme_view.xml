@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:parentTag="android.support.constraint.ConstraintLayout">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:text="TextView"
+        tools:layout_editor_absoluteX="224dp"
+        tools:layout_editor_absoluteY="210dp" />
+
+    <ImageView
+        android:id="@+id/captureView"
+        android:layout_width="match_parent"
+        tools:src="#333"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="55dp"
+        tools:layout_editor_absoluteY="124dp" />
+    <ImageView
+        android:id="@+id/emojiView"
+        android:layout_width="match_parent"
+        tools:src="#333"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="55dp"
+        tools:layout_editor_absoluteY="124dp" />
+</merge>

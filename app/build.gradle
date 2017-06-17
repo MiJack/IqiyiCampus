@@ -11,6 +11,20 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+    signingConfigs {
+        releaseConfig {
+            keyAlias 'iqiyi-app'
+            keyPassword 'iqiyi-app'
+            storeFile file('key.keystore.jks')
+            storePassword 'iqiyi-app'
+        }
+        debugConfig {
+            keyAlias 'iqiyi-app'
+            keyPassword 'iqiyi-app'
+            storeFile file('key.keystore.jks')
+            storePassword 'iqiyi-app'
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false

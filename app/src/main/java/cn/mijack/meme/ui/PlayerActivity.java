@@ -368,11 +368,16 @@ public class PlayerActivity extends BaseActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
         if (mediaProjection != null) {
             mediaProjection.stop();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
         mMainHandler.removeCallbacksAndMessages(null);
         if (mVideoView != null) {
             mVideoView.release();

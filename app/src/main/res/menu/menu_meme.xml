@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:title="Item"
+        android:icon="@drawable/ic_text"
+        app:showAsAction="always" />
+    <item
+        android:title="Item"
+        android:icon="@drawable/ic_format_color_text"
+        app:showAsAction="always" />
+    <item
+        android:title="Item"
+        android:icon="@drawable/ic_font_size_down"
+        app:showAsAction="always" />
+    <item
+        android:icon="@drawable/ic_font_size_up"
+        android:title="Item"
+        app:showAsAction="always" />
+    <item
+        android:title="Item"
+        android:icon="@drawable/ic_emoji"
+        app:showAsAction="always" />
+    <item
+        android:title="Item"
+        android:icon="@drawable/ic_cloud_upload"
+        app:showAsAction="always" />
+    <item
+        android:title="Item"
+        android:icon="@drawable/ic_share"
+        app:showAsAction="always" />
+</menu>

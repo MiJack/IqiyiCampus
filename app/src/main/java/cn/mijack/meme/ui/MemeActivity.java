@@ -7,41 +7,54 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.bumptech.glide.BitmapTypeRequest;
+import com.bumptech.glide.Glide;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import cn.mijack.meme.R;
-import cn.mijack.meme.adapter.EmojiAdapter;
 import cn.mijack.meme.adapter.EmojiPageAdapter;
 import cn.mijack.meme.base.BaseActivity;
 import cn.mijack.meme.model.Emoji;
 import cn.mijack.meme.model.VideoInfo;
 import cn.mijack.meme.remote.ApiResponse;
 import cn.mijack.meme.remote.Result;
+import cn.mijack.meme.utils.Utils;
+import cn.mijack.meme.view.MemeView;
 import cn.mijack.meme.vm.MemeViewModel;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 import me.relex.circleindicator.CircleIndicator;
 
 public class MemeActivity extends BaseActivity {
     private static final int SPAN_COUNT = 8;
     VideoInfo videoInfo;
     private long progess;
-//    RecyclerView recyclerView;
+    //    RecyclerView recyclerView;
     private GridLayoutManager layoutManager;
     private MemeViewModel memeViewModel;
-//    private EmojiAdapter emojiAdapter;
+    //    private EmojiAdapter emojiAdapter;
     private EmojiPageAdapter emojiPageAdapter;
 
-    private Observer<ApiResponse<Result<List<Emoji>>>> observer = emojiResult -> {
-        if (emojiResult ==null){
+    private Observer<ApiResponse<Result<List<Emoji>>>> dataObserver = emojiResult -> {
+        if (emojiResult == null) {
             Toast.makeText(this, "请求异常", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -50,7 +63,13 @@ public class MemeActivity extends BaseActivity {
         emojiPageAdapter.setEmojis(data);
     };
     private ViewPager viewPager;
-
+    private MemeView memeView;
+    Observer<String> emojiObserver = url -> {
+        if (TextUtils.isEmpty(url)) {
+            return;
+        }
+        memeView.setEmojiBitmapUrl(url);
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,11 +89,9 @@ public class MemeActivity extends BaseActivity {
         memeViewModel = ViewModelProviders.of(this).get(MemeViewModel.class);
 
         videoInfo = (VideoInfo) intent.getSerializableExtra("videoInfo");
+        memeView = (MemeView) findViewById(R.id.memeView);
         progess = intent.getLongExtra("progress", -1);
         layoutManager = new GridLayoutManager(this, SPAN_COUNT, GridLayoutManager.HORIZONTAL, false);
-//        recyclerView.setLayoutManager(layoutManager);
-//        emojiAdapter = new EmojiAdapter();
-//        recyclerView.setAdapter(emojiAdapter);
         emojiPageAdapter = new EmojiPageAdapter(getSupportFragmentManager());
         viewPager.setAdapter(emojiPageAdapter);
         CircleIndicator indicator = (CircleIndicator) findViewById(R.id.indicator);
@@ -85,31 +102,22 @@ public class MemeActivity extends BaseActivity {
         layoutParams.width = ViewPager.LayoutParams.MATCH_PARENT;
         layoutParams.height = ViewPager.LayoutParams.WRAP_CONTENT;
         layoutParams.gravity = Gravity.BOTTOM;
+        memeViewModel.loadEmoji().observe(this, dataObserver);
 
-//        final ViewPagerIndicator viewPagerIndicator = new ViewPagerIndicator(context);
-//        viewPager.addView(viewPagerIndicator, layoutParams);
-        memeViewModel.loadEmoji().observe(this,observer);
+        memeViewModel.getEmojiUrlLiveData().observe(this, emojiObserver);
         String bitmap = intent.getStringExtra("image");
-        new AsyncTask<String, Void, Bitmap>() {
-            @Override
-            protected Bitmap doInBackground(String... strings) {
-                try {
-                    FileInputStream fileInputStream = openFileInput(strings[0]);
+        Observable.just(bitmap)
+                .subscribeOn(Schedulers.io())
+                .map(s -> {
+                    FileInputStream fileInputStream = openFileInput(s);
                     return BitmapFactory.decodeStream(fileInputStream);
-
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Bitmap bitmap) {
-                ImageView view = (ImageView) findViewById(R.id.memeView);
-                view.setImageBitmap(bitmap);
-            }
-        }.execute(bitmap);
-
+                }).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(bitmap1 -> memeView.setImageBitmap(bitmap1));
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_meme,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 }

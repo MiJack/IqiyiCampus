@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <declare-styleable name="GridContainer">
-        <attr name="layoutId" format="reference" />
-        <attr name="row" format="integer|reference" />
-        <attr name="column" format="reference|integer" />
-    </declare-styleable>
-</resources>
