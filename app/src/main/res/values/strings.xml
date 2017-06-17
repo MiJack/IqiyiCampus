@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Meme</string>
-    <string name="copy_right"><![CDATA[Copy©Mi&Jack]]></string>
+    <string name="copy_right"><![CDATA[Copy © Mi&Jack]]></string>
 
     <string name="nick_name">昵称</string>
     <string name="email">邮箱</string>
