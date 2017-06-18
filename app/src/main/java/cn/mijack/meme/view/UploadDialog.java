@@ -1,6 +1,7 @@
 package cn.mijack.meme.view;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DialogTitle;
@@ -22,9 +23,11 @@ public class UploadDialog implements View.OnClickListener {
     AlertDialog alertDialog;
     private Button button1;
     private Button button2;
+    private Activity activity;
 
-    public UploadDialog(Context context) {
-        LayoutInflater inflater = LayoutInflater.from(context);
+    public UploadDialog(Activity activity) {
+        this.activity = activity;
+        LayoutInflater inflater = LayoutInflater.from(activity);
         View view = inflater.inflate(R.layout.dialog_upload, null, false);
         alertTitle = (DialogTitle) view.findViewById(R.id.alertTitle);
         message = (TextView) view.findViewById(android.R.id.message);
@@ -34,7 +37,7 @@ public class UploadDialog implements View.OnClickListener {
         button2.setOnClickListener(this);
         alertTitle.setText("上传图片");
         message.setText("正在获取token");
-        alertDialog = new AlertDialog.Builder(context)
+        alertDialog = new AlertDialog.Builder(activity)
                 .setTitle("上传图片")
                 .setMessage("正在获取token")
                 .setView(view)
@@ -82,5 +85,8 @@ public class UploadDialog implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         dismiss();
+        if (android.R.id.button1 == v.getId()) {
+            activity.finish();
+        }
     }
 }

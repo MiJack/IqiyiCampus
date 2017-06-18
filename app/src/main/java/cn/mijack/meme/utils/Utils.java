@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import cn.mijack.meme.model.MemeEntity;
+import cn.mijack.meme.ui.PlayerActivity;
 
 /**
  * @author Mr.Yuan
@@ -131,5 +132,12 @@ public class Utils {
 
     public static boolean isEmpty(Collection collection) {
         return size(collection) == 0;
+    }
+
+    public static int getScreenWidth(Context context) {
+        return context.getResources().getDisplayMetrics().widthPixels;
+    }
+    public static int getScreenHeight(Context context) {
+        return context.getResources().getDisplayMetrics().heightPixels;
     }
 }

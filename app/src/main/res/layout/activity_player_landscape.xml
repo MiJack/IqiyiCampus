@@ -12,8 +12,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:src="@drawable/ic_arrow_back"/>
+        app:layout_constraintTop_toTopOf="parent"/>
     <!--the height 200 is reference value, normally the width and height should be 16:9-->
     <cn.mijack.meme.view.MemeVideoView
         android:id="@+id/id_videoview"

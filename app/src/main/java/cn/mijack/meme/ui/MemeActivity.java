@@ -80,7 +80,6 @@ public class MemeActivity extends BaseActivity {
     private static final String DIALOG = "dialog";
     VideoInfo videoInfo;
     private int progess;
-    private GridLayoutManager layoutManager;
     private MemeViewModel memeViewModel;
     private EmojiPageAdapter emojiPageAdapter;
     private DrawerLayout drawerLayout;
@@ -128,7 +127,6 @@ public class MemeActivity extends BaseActivity {
         memeView = (MemeView) findViewById(R.id.memeView);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         progess = intent.getIntExtra("progress", -1);
-        layoutManager = new GridLayoutManager(this, SPAN_COUNT, GridLayoutManager.HORIZONTAL, false);
         emojiPageAdapter = new EmojiPageAdapter(getSupportFragmentManager());
         viewPager.setAdapter(emojiPageAdapter);
         CircleIndicator indicator = (CircleIndicator) findViewById(R.id.indicator);
@@ -205,7 +203,6 @@ public class MemeActivity extends BaseActivity {
     }
 
     UploadDialog uploadDialog;
-    Gson gson = new Gson();
 
     @NonNull
     private void uploadToQiniu() {
@@ -244,12 +241,9 @@ public class MemeActivity extends BaseActivity {
                             e.printStackTrace();
                             uploadDialog.showFail();
                         }
-                    }, new UploadOptions(null, null, true, new UpProgressHandler() {
-                        @Override
-                        public void progress(String key, double percent) {
-                            System.out.println("key:" + key + "\tpercent:" + percent);
-                            uploadDialog.showUploadProgress(percent);
-                        }
+                    }, new UploadOptions(null, null, true, (key, percent) -> {
+                        System.out.println("key:" + key + "\tpercent:" + percent);
+                        uploadDialog.showUploadProgress(percent);
                     }, null));
                     System.out.println("token:" + s);
                 }, throwable -> {

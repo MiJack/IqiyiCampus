@@ -1,6 +1,9 @@
 package cn.mijack.meme.ui;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.arch.persistence.room.Room;
@@ -31,6 +34,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -273,8 +277,7 @@ public class PlayerActivity extends BaseActivity {
         //请求
         mMemeButton.setOnClickListener(v -> {
             pauseVideo();
-            //todo add listener
-            Transition sDefaultTransition = new AutoTransition();
+            AutoTransition sDefaultTransition = new AutoTransition();
 
             sDefaultTransition.addListener(new Transition.TransitionListener() {
                 @Override
@@ -307,17 +310,12 @@ public class PlayerActivity extends BaseActivity {
             ConstraintSet constraintSet = new ConstraintSet();
             constraintSet.clone(this, R.layout.activity_player_meme);
             constraintSet.applyTo(mConstraintLayout);
-            DisplayMetrics metric = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(metric);
-            int width = metric.widthPixels - getResources().getDimensionPixelOffset(R.dimen.videoViewMargin) * 2;
-            int height = (int) (width * 9.0 / 16);
-            mVideoView.setVideoViewSize(width, height);
+//            DisplayMetrics metric = new DisplayMetrics();
+//            getWindowManager().getDefaultDisplay().getMetrics(metric);
+//            int width = metric.widthPixels - getResources().getDimensionPixelOffset(R.dimen.videoViewMargin) * 2;
+//            int height = (int) (width * 9.0 / 16);
+//            mVideoView.setVideoViewSize(width, height);
             controlBack.setVisibility(View.GONE);
-//            if (mImageReader == null) {
-//                startActivityForResult(mMediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
-//            } else {
-//                handlerImage(mImageReader.acquireLatestImage());
-//            }
         });
 
         mSeekBar = (SeekBar) findViewById(R.id.id_progress);
@@ -346,6 +344,7 @@ public class PlayerActivity extends BaseActivity {
     }
 
     private void startVideo() {
+        setUpView();
         mVideoView.start();
         mPlayPauseView.setImageResource(R.drawable.ic_pause);
         mMainHandler.sendEmptyMessageDelayed(HANDLER_MSG_UPDATE_PROGRESS, HANDLER_DEPLAY_UPDATE_PROGRESS);
@@ -437,49 +436,8 @@ public class PlayerActivity extends BaseActivity {
     }
 
     public void capture() {
-        //请求读取权限
-//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-//            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-//                new AlertDialog.Builder(this).setTitle("请求权限")
-//                        .setTitle("截图保持在SD卡中，需要存储权限，请前往设置打开权限重试")
-//                        .setCancelable(false)
-//                        .setPositiveButton("确定", (dialog, which) -> {
-//                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-//                            Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
-//                            intent.setData(uri);
-//                            startActivityForResult(intent, REQUEST_CODE_CHANGE_PERMISSION);
-//                            dialog.dismiss();
-//                        })
-//                        .setNegativeButton("取消", (dialog, which) -> Toast.makeText(PlayerActivity.this, "权限请求失败，无法截图", Toast.LENGTH_SHORT).show()).create().show();
-//            } else {
-//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
-//            }
-//        } else {
-        //todo fix bug 未授权前的请求
         captureImage();
-//        }
     }
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        if (requestCode == REQUEST_CODE_CHANGE_PERMISSION) {
-//            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-//                captureImage();
-//            } else {
-//                new AlertDialog.Builder(this).setTitle("请求权限")
-//                        .setTitle("截图保持在SD卡中，需要存储权限，请前往设置打开权限重试")
-//                        .setCancelable(false)
-//                        .setPositiveButton("确定", (dialog, which) -> {
-//                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-//                            Uri uri = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null);
-//                            intent.setData(uri);
-//                            startActivityForResult(intent, REQUEST_CODE_CHANGE_PERMISSION);
-//                            dialog.dismiss();
-//                        })
-//                        .setNegativeButton("取消", (dialog, which) -> Toast.makeText(PlayerActivity.this, "权限请求失败，无法截图", Toast.LENGTH_SHORT).show()).create().show();
-//            }
-//        }
-//    }
 
     private void captureImage() {
         if (mImageReader == null) {
@@ -513,6 +471,9 @@ public class PlayerActivity extends BaseActivity {
 //            mImageReader.setOnImageAvailableListener(this, null);
             mMainHandler.postDelayed(() -> handlerImage(mImageReader.acquireLatestImage()), 50);
         }
+        if (requestCode==REQUEST_CODE_UPLOAD_MEME){
+            startVideo();
+        }
     }
 
     private void handlerImage(Image image) {
@@ -521,7 +482,7 @@ public class PlayerActivity extends BaseActivity {
             return;
         }
         new Thread(() -> {
-            DisplayMetrics metric = new DisplayMetrics();
+            try { DisplayMetrics metric = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(metric);
             int width = metric.widthPixels;
             int height = metric.heightPixels;
@@ -538,15 +499,13 @@ public class PlayerActivity extends BaseActivity {
             int left = location[0];
             int top = location[1];
             System.out.println("left:" + location[0] + " top:" + location[1]);
-            try {
+
                 for (int i = 0; i < mVideoView.getWidth(); i++) {
                     for (int j = 0; j < mVideoView.getHeight(); j++) {
                         bitmap.setPixel(i, j, mBitmap.getPixel(left + i, top + j));
                     }
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
             System.out.println("ok");
             DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
             String png = "myscreen_" + dateFormat.format(new Date(System.currentTimeMillis())) + ".png";
@@ -560,7 +519,13 @@ public class PlayerActivity extends BaseActivity {
             intent.putExtra("videoInfo", videoInfo);
             intent.putExtra("progress", mVideoView.getCurrentPosition());
             startActivityForResult(intent, REQUEST_CODE_UPLOAD_MEME);
-            image.close();
+            image.close(); } catch (Exception e) {
+            e.printStackTrace();
+            runOnUiThread(()->{
+                Toast.makeText(this, "截图失败！", Toast.LENGTH_SHORT).show();
+                startVideo();
+            });
+        }
         }).start();
     }
 
@@ -573,6 +538,7 @@ public class PlayerActivity extends BaseActivity {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN);
             mIsLandscape = true;
+            mVideoView.setVideoViewSize(screenWidth, (int) (screenWidth * 9.0 / 16));
             recyclerView.setVisibility(View.GONE);
             ConstraintSet mConstraintSet = new ConstraintSet(); // create a Constraint Set
             mConstraintSet.clone(getBaseContext(), R.layout.activity_player_landscape); //
