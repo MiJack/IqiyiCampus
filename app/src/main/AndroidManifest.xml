@@ -31,8 +31,9 @@
         <activity android:name=".ui.MainActivity" />
         <activity
             android:name=".ui.AccountActivity"
-            android:label="登录/注册" />
-        <activity android:name=".ui.VideoHistoryActivity" />
+            android:label="@string/login_register" />
+        <activity android:name=".ui.VideoHistoryActivity"
+            android:label="@string/video_history"/>
         <activity
             android:name=".ui.PlayerActivity"
             android:configChanges="orientation|screenSize|layoutDirection" />
@@ -43,6 +44,7 @@
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".ui.MemeHistoryActivity"
+            android:label="@string/my_meme"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <provider

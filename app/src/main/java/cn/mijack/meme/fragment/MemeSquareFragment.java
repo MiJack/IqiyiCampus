@@ -66,7 +66,7 @@ public class MemeSquareFragment extends BaseFragment implements SwipeRefreshLayo
         MarginItemDecoration marginItemDecoration = new MarginItemDecoration(Utils.dipToPixels(getActivity(), 8));
         marginItemDecoration.setColor(ContextCompat.getColor(getActivity(),R.color.colorDivider));
         recyclerView.addItemDecoration(marginItemDecoration);
-        memeAdapter = new MemeAdapter();
+        memeAdapter = new MemeAdapter(MemeAdapter.TYPE_SQUARE);
         recyclerView.setAdapter(memeAdapter);
         refreshLayout.setOnRefreshListener(this);
     }

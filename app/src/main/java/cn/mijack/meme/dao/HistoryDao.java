@@ -20,6 +20,6 @@ public interface HistoryDao {
     void insertHistory(HistoryEntity entity);
 
 
-    @Query("SELECT * FROM history")
+    @Query("SELECT * FROM history order by updateTime desc")
     LiveData<List<HistoryEntity>> loadAllHistory();
 }

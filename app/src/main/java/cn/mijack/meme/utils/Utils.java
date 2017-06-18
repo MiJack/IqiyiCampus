@@ -18,8 +18,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import cn.mijack.meme.model.MemeEntity;
 
 /**
  * @author Mr.Yuan
@@ -95,6 +99,7 @@ public class Utils {
         }
         return url + "?imageView2/1/w/" + width + "/h/" + height;
     }
+
     public static Bitmap getViewBp(View v) {
         if (null == v) {
             return null;
@@ -118,5 +123,13 @@ public class Utils {
         v.setDrawingCacheEnabled(false);
         v.destroyDrawingCache();
         return b;
+    }
+
+    public static int size(Collection collection) {
+        return collection == null ? 0 : collection.size();
+    }
+
+    public static boolean isEmpty(Collection collection) {
+        return size(collection) == 0;
     }
 }

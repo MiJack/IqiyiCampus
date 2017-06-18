@@ -120,4 +120,7 @@
     <string name="ok">确定</string>
     <string name="error">请求异常</string>
     <string name="dialog_title">正在生成中</string>
+    <string name="my_meme">我上传的Meme</string>
+    <string name="login_register">登录/注册</string>
+    <string name="video_history">看过的视频</string>
 </resources>

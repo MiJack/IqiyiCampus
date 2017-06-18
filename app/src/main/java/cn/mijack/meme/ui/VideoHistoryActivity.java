@@ -4,9 +4,11 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 
 import java.util.List;
 
@@ -14,6 +16,8 @@ import cn.mijack.meme.R;
 import cn.mijack.meme.adapter.HistoryAdapter;
 import cn.mijack.meme.base.BaseActivity;
 import cn.mijack.meme.model.HistoryEntity;
+import cn.mijack.meme.utils.Utils;
+import cn.mijack.meme.view.MarginItemDecoration;
 import cn.mijack.meme.vm.VideoHistoryViewModel;
 
 /**
@@ -46,7 +50,16 @@ public class VideoHistoryActivity extends BaseActivity {
         recyclerView.setAdapter(historyAdapter);
         linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
-        //todo 添加点击播放
+    }
 
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

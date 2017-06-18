@@ -1,12 +1,12 @@
 package cn.mijack.meme.ui;
 
 
-import android.Manifest;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -15,7 +15,6 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -27,9 +26,7 @@ import android.support.constraint.ConstraintSet;
 import android.support.transition.AutoTransition;
 import android.support.transition.Transition;
 import android.support.transition.TransitionManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -41,7 +38,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.util.Util;
 import com.google.gson.Gson;
 import com.iqiyi.player.nativemediaplayer.MediaPlayerState;
 import com.qiyi.video.playcore.ErrorCode;
@@ -52,17 +48,21 @@ import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
-import cn.mijack.meme.BuildConfig;
 import cn.mijack.meme.R;
+import cn.mijack.meme.adapter.MemeAdapter;
 import cn.mijack.meme.base.BaseActivity;
 import cn.mijack.meme.dao.HistoryDatabase;
 import cn.mijack.meme.model.HistoryEntity;
+import cn.mijack.meme.model.MemeEntity;
 import cn.mijack.meme.model.VideoInfo;
+import cn.mijack.meme.remote.ApiResponse;
+import cn.mijack.meme.remote.Result;
 import cn.mijack.meme.utils.LogUtils;
 import cn.mijack.meme.utils.Utils;
 import cn.mijack.meme.view.MemeVideoView;
+import cn.mijack.meme.vm.PlayerViewModel;
 
 /**
  * Created by zhouxiaming on 2017/5/9.
@@ -84,7 +84,7 @@ public class PlayerActivity extends BaseActivity {
     private SeekBar mSeekBar;
     private TextView mCurrentTime;
     private TextView mTotalTime;
-
+    PlayerViewModel playerViewModel;
     IQYPlayerHandlerCallBack mCallBack = new IQYPlayerHandlerCallBack() {
         /**
          * SeekTo 成功，可以通过该回调获取当前准确时间点。
@@ -183,6 +183,22 @@ public class PlayerActivity extends BaseActivity {
     private VideoInfo videoInfo;
     private RecyclerView recyclerView;
     HistoryDatabase db;
+    private MemeAdapter memeAdapter;
+
+    Observer<ApiResponse<Result<List<MemeEntity>>>> observer =
+            (resultApiResponse) -> {
+                if (resultApiResponse != null && resultApiResponse.body != null) {
+                    memeAdapter.setData(resultApiResponse.body.getData());
+                } else {
+                    Toast.makeText(PlayerActivity.this, "请求失败", Toast.LENGTH_SHORT).show();
+                }
+            };
+    Observer<Integer> progressObserver =
+            progress -> {
+                if (mVideoView != null && progress > 0 && progress < mVideoView.getDuration()) {
+                    mVideoView.seekTo(progress);
+                }
+            };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -202,11 +218,18 @@ public class PlayerActivity extends BaseActivity {
         mMediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         getContentResolver().registerContentObserver(Settings.System.getUriFor(Settings.System.ACCELEROMETER_ROTATION),
                 true, rotationObserver);
-        currentPosition =  intent.getIntExtra("time", -1);
+        currentPosition = intent.getIntExtra("time", -1);
         setContentView(R.layout.activity_player_portrait);
         mVideoView = (MemeVideoView) findViewById(R.id.id_videoview);
         mMemeButton = (ImageView) findViewById(R.id.idMeme);
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        memeAdapter = new MemeAdapter(MemeAdapter.TYPE_VIDEO);
+        recyclerView.setAdapter(memeAdapter);
+        playerViewModel = ViewModelProviders.of(this).get(PlayerViewModel.class);
+        playerViewModel.getMemeList(videoInfo.tId)
+                .observe(this, observer);
+        playerViewModel.getProgressData().observe(this, progressObserver);
         //mVideoView.setPlayData("667737400");
         mVideoView.setPlayData(videoInfo.tId);
         //设置回调，监听播放器状态
@@ -396,7 +419,7 @@ public class PlayerActivity extends BaseActivity {
         LogUtils.d(TAG, "HANDLER_MSG_UPDATE_PROGRESS, duration = " + duration + ", currentPosition = " + progress);
         if (duration > 0) {
             HistoryEntity entity = new HistoryEntity(videoInfo.id, videoInfo.title, videoInfo.img, videoInfo.aId, videoInfo.tId,
-                    System.currentTimeMillis(), progress, duration,new Gson().toJson(videoInfo));
+                    System.currentTimeMillis(), progress, duration, new Gson().toJson(videoInfo));
             db.historyDao().insertHistory(entity);
         }
         if (duration > 0) {

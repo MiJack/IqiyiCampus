@@ -15,7 +15,6 @@ public class MarginItemDecoration extends RecyclerView.ItemDecoration {
     private Paint paint;
     private int color;
     private int dividerSize = 20;
-
     public MarginItemDecoration(int dividerSize) {
         this.dividerSize = dividerSize;
         paint = new Paint();

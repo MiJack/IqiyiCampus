@@ -52,7 +52,6 @@ import cn.mijack.meme.R;
 import cn.mijack.meme.adapter.EmojiPageAdapter;
 import cn.mijack.meme.base.BaseActivity;
 import cn.mijack.meme.model.Emoji;
-import cn.mijack.meme.model.TokenEntity;
 import cn.mijack.meme.model.UploadUnit;
 import cn.mijack.meme.model.VideoInfo;
 import cn.mijack.meme.remote.ApiResponse;
@@ -67,9 +66,6 @@ import cn.mijack.meme.view.UploadDialog;
 import cn.mijack.meme.vm.MemeViewModel;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import me.relex.circleindicator.CircleIndicator;
 
@@ -164,6 +160,9 @@ public class MemeActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
             case R.id.actionText:
                 showInputTextDialog();
                 break;
@@ -210,7 +209,7 @@ public class MemeActivity extends BaseActivity {
 
     @NonNull
     private void uploadToQiniu() {
-        memeViewModel.requestToken(UserManager.get(this).getUser().getUid(), videoInfo.tId, progess,videoInfo.title,
+        memeViewModel.requestToken(UserManager.get(this).getUser().getUid(), videoInfo.tId, progess, videoInfo.title,
                 videoInfo.shortTitle, videoInfo)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -228,7 +227,7 @@ public class MemeActivity extends BaseActivity {
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
                     byte[] byteArray = stream.toByteArray();
-                    return new UploadUnit(byteArray,tokenEntity.getKey(),tokenEntity.getToken());
+                    return new UploadUnit(byteArray, tokenEntity.getKey(), tokenEntity.getToken());
                 })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe((UploadUnit s) -> {

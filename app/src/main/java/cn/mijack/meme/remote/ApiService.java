@@ -56,9 +56,9 @@ public interface ApiService {
     LiveData<ApiResponse<Result<List<MemeEntity>>>> listMemes();
 
     @GET(SERVER + "/listFiles")
-    LiveData<ApiResponse<Result<List<MemeEntity>>>> listMyMemes(@Query("uid") int uid);
+    LiveData<ApiResponse<Result<List<MemeEntity>>>> listMyMemes(@Query("uid") String uid);
 
     @GET(SERVER + "/listFiles")
-    LiveData<ApiResponse<Result<List<MemeEntity>>>> listMemes(@Query("videoId") int videoId);
+    LiveData<ApiResponse<Result<List<MemeEntity>>>> listMemes(@Query("videoId") String videoId);
 }
 
