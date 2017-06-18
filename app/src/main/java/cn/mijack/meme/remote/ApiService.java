@@ -41,5 +41,10 @@ public interface ApiService {
 
     @GET(SERVER + "/requestQiniuToken")
 //    http://develop.mijack.cn:8080/requestQiniuToken?uid=12&videoId=12&startTime=1212
-    Observable<Result<TokenEntity>> requestToken(@Query("uid") int uid, @Query("videoId") String vId, @Query("startTime") long progess);
+    Observable<Result<TokenEntity>> requestToken(
+            @Query("uid") int uid, @Query("videoId") String vId,
+            @Query("startTime") long progess,
+            @Query("title") String title,
+            @Query("shortTitle") String shortTitle);
 }
+

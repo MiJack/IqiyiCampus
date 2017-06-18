@@ -33,13 +33,12 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.qiniu.android.common.AutoZone;
-import com.qiniu.android.http.ResponseInfo;
 import com.qiniu.android.storage.Configuration;
-import com.qiniu.android.storage.UpCompletionHandler;
+import com.qiniu.android.storage.UpProgressHandler;
 import com.qiniu.android.storage.UploadManager;
 import com.qiniu.android.storage.UploadOptions;
 
-import org.json.JSONObject;
+import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -52,6 +51,8 @@ import cn.mijack.meme.R;
 import cn.mijack.meme.adapter.EmojiPageAdapter;
 import cn.mijack.meme.base.BaseActivity;
 import cn.mijack.meme.model.Emoji;
+import cn.mijack.meme.model.TokenEntity;
+import cn.mijack.meme.model.UploadUnit;
 import cn.mijack.meme.model.VideoInfo;
 import cn.mijack.meme.remote.ApiResponse;
 import cn.mijack.meme.remote.Result;
@@ -65,6 +66,9 @@ import cn.mijack.meme.view.UploadDialog;
 import cn.mijack.meme.vm.MemeViewModel;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import me.relex.circleindicator.CircleIndicator;
 
@@ -204,7 +208,7 @@ public class MemeActivity extends BaseActivity {
 
     @NonNull
     private void uploadToQiniu() {
-        memeViewModel.requestToken(UserManager.get(this).getUser().getUid(), videoInfo.tId, progess)
+        memeViewModel.requestToken(UserManager.get(this).getUser().getUid(), videoInfo.tId, progess,videoInfo.title,videoInfo.shortTitle)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(token -> {
@@ -214,23 +218,40 @@ public class MemeActivity extends BaseActivity {
                 .observeOn(Schedulers.io())
                 .map(resultApiResponse -> resultApiResponse.getData())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(s -> {
+                .doOnNext(disposable -> uploadDialog.showGenerateByteData())
+                .observeOn(Schedulers.io())
+                .map(tokenEntity -> {
                     Bitmap bmp = Utils.getViewBp(memeView);
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                     bmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
                     byte[] byteArray = stream.toByteArray();
-                    //todo 优化线程
-                    uploadManager.put(byteArray, s.getKey(), s.getToken(), new UpCompletionHandler() {
-                        @Override
-                        public void complete(String key, ResponseInfo info, JSONObject response) {
-
+                    return new UploadUnit(byteArray,tokenEntity.getKey(),tokenEntity.getToken());
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((UploadUnit s) -> {
+                    uploadDialog.showUploadProgress(0);
+                    uploadManager.put(s.getData(), s.getKey(), s.getToken(), (key, info, response) -> {
+                        System.out.println("[complete]key:" + key);
+                        try {
+                            if (response.has("code") && response.getInt("code") == 200) {
+                                uploadDialog.showSuccess();
+                            } else {
+                                uploadDialog.showFail(response.getString("msg"));
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            uploadDialog.showFail();
                         }
-                    }, new UploadOptions(null, null, true, null, null));
+                    }, new UploadOptions(null, null, true, new UpProgressHandler() {
+                        @Override
+                        public void progress(String key, double percent) {
+                            System.out.println("key:" + key + "\tpercent:" + percent);
+                            uploadDialog.showUploadProgress(percent);
+                        }
+                    }, null));
                     System.out.println("token:" + s);
                 }, throwable -> {
                     Toast.makeText(this, "上传失败", Toast.LENGTH_SHORT).show();
-                }, () -> {
-                    uploadDialog.dismiss();
                 });
     }
 

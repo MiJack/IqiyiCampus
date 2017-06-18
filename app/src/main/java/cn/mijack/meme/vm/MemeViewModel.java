@@ -39,7 +39,7 @@ public class MemeViewModel extends BaseViewModel {
         return emojiUrlLiveData;
     }
 
-    public Observable<Result<TokenEntity>> requestToken(int uid, String vId, long progess) {
-        return getApiService().requestToken(uid,vId,progess);
+    public Observable<Result<TokenEntity>> requestToken(int uid, String vId, long progess, String title, String shortTitle) {
+        return getApiService().requestToken(uid,vId,progess,title,shortTitle);
     }
 }
