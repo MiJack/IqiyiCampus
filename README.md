@@ -30,6 +30,22 @@ Meme这个词最初源自英国著名科学家理查德•道金斯（Richard Da
 服务端的开发框架为Spring-boot，数据库存储为mysql，图片的存储服务采用的七牛云服务。
 ## 应用截图
 
+应用的4大Tab页
+
+![](images/main-tab.png)
+
+![](images/other.png)
+
+全屏播放界面
+![](images/player.png)
+点击上图中下方的笑脸，即可进入`制作Meme`的界面（如下图）
+![](images/demo.png)
+相关的操作指南如下：
+
+![](images/toolbar.png)
+
+我们还提供了丰富的Emoji表情。
+![](images/emojis.png)
 
 
 ## SDK版本说明
