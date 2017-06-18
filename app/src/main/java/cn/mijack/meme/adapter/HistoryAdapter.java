@@ -46,7 +46,6 @@ public class HistoryAdapter extends RecyclerView.Adapter {
         TextView tvVideoPlayStatue = (TextView) viewHolder.itemView.findViewById(R.id.tvVideoPlayStatue);
         TextView tvVideoPlayTime = (TextView) viewHolder.itemView.findViewById(R.id.tvVideoPlayTime);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日");
-        //todo 优化界面先显示
         tvDate.setText(dateFormat.format(new Date(historyEntity.getUpdateTime())));
         videoTitle.setText(historyEntity.getTitle());
         videoProgress.setProgress((int) (historyEntity.getProgress() * 100 / historyEntity.getDuration()));

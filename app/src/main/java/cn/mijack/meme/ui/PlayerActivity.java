@@ -138,7 +138,7 @@ public class PlayerActivity extends BaseActivity {
             if (i == MediaPlayerState.MPS_Prepared) {
                 renderTime();
             }
-            if (i == MediaPlayerState.MPS_MoviePlaying && currentPosition != -1) {
+            if (i == MediaPlayerState.MPS_MoviePlaying && currentPosition > 0) {
                 if (currentPosition < mVideoView.getDuration()) {
                     mVideoView.seekTo(currentPosition);
                 }
@@ -361,6 +361,18 @@ public class PlayerActivity extends BaseActivity {
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("progress", currentPosition);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        currentPosition = savedInstanceState.getInt("progress", -1);
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         if (null != mVideoView) {
@@ -471,7 +483,7 @@ public class PlayerActivity extends BaseActivity {
 //            mImageReader.setOnImageAvailableListener(this, null);
             mMainHandler.postDelayed(() -> handlerImage(mImageReader.acquireLatestImage()), 50);
         }
-        if (requestCode==REQUEST_CODE_UPLOAD_MEME){
+        if (requestCode == REQUEST_CODE_UPLOAD_MEME) {
             startVideo();
         }
     }
@@ -482,23 +494,24 @@ public class PlayerActivity extends BaseActivity {
             return;
         }
         new Thread(() -> {
-            try { DisplayMetrics metric = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(metric);
-            int width = metric.widthPixels;
-            int height = metric.heightPixels;
-            final Image.Plane[] planes = image.getPlanes();
-            final ByteBuffer buffer = planes[0].getBuffer();
-            int pixelStride = planes[0].getPixelStride();
-            int rowStride = planes[0].getRowStride();
-            int rowPadding = rowStride - pixelStride * width;
-            Bitmap mBitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
-            mBitmap.copyPixelsFromBuffer(buffer);
-            Bitmap bitmap = Bitmap.createBitmap(mVideoView.getWidth(), mVideoView.getHeight(), Bitmap.Config.ARGB_8888);
-            int[] location = new int[2];
-            mVideoView.getLocationOnScreen(location);
-            int left = location[0];
-            int top = location[1];
-            System.out.println("left:" + location[0] + " top:" + location[1]);
+            try {
+                DisplayMetrics metric = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getMetrics(metric);
+                int width = metric.widthPixels;
+                int height = metric.heightPixels;
+                final Image.Plane[] planes = image.getPlanes();
+                final ByteBuffer buffer = planes[0].getBuffer();
+                int pixelStride = planes[0].getPixelStride();
+                int rowStride = planes[0].getRowStride();
+                int rowPadding = rowStride - pixelStride * width;
+                Bitmap mBitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
+                mBitmap.copyPixelsFromBuffer(buffer);
+                Bitmap bitmap = Bitmap.createBitmap(mVideoView.getWidth(), mVideoView.getHeight(), Bitmap.Config.ARGB_8888);
+                int[] location = new int[2];
+                mVideoView.getLocationOnScreen(location);
+                int left = location[0];
+                int top = location[1];
+                System.out.println("left:" + location[0] + " top:" + location[1]);
 
                 for (int i = 0; i < mVideoView.getWidth(); i++) {
                     for (int j = 0; j < mVideoView.getHeight(); j++) {
@@ -506,26 +519,28 @@ public class PlayerActivity extends BaseActivity {
                     }
                 }
 
-            System.out.println("ok");
-            DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-            String png = "myscreen_" + dateFormat.format(new Date(System.currentTimeMillis())) + ".png";
-            try {
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, this.openFileOutput(png, Context.MODE_PRIVATE));
-            } catch (FileNotFoundException e) {
+                System.out.println("ok");
+                DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+                String png = "myscreen_" + dateFormat.format(new Date(System.currentTimeMillis())) + ".png";
+                try {
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, this.openFileOutput(png, Context.MODE_PRIVATE));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                Intent intent = new Intent(this, MemeActivity.class);
+                intent.putExtra("image", png);
+                intent.putExtra("videoInfo", videoInfo);
+                intent.putExtra("progress", mVideoView.getCurrentPosition());
+                startActivityForResult(intent, REQUEST_CODE_UPLOAD_MEME);
+                image.close();
+                currentPosition=mVideoView.getCurrentPosition();
+            } catch (Exception e) {
                 e.printStackTrace();
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "截图失败！", Toast.LENGTH_SHORT).show();
+                    startVideo();
+                });
             }
-            Intent intent = new Intent(this, MemeActivity.class);
-            intent.putExtra("image", png);
-            intent.putExtra("videoInfo", videoInfo);
-            intent.putExtra("progress", mVideoView.getCurrentPosition());
-            startActivityForResult(intent, REQUEST_CODE_UPLOAD_MEME);
-            image.close(); } catch (Exception e) {
-            e.printStackTrace();
-            runOnUiThread(()->{
-                Toast.makeText(this, "截图失败！", Toast.LENGTH_SHORT).show();
-                startVideo();
-            });
-        }
         }).start();
     }
 
