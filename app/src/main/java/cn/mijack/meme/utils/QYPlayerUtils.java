@@ -22,11 +22,20 @@ public class QYPlayerUtils {
      */
     public static void jumpToPlayerActivity(Context context, VideoInfo videoInfo) {
         Intent intent = new Intent(context, PlayerActivity.class);
-        intent.putExtra("video",videoInfo);
+        intent.putExtra("video", videoInfo);
         if (!(context instanceof Activity)) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
         context.startActivity(intent);
     }
 
+    public static void jumpToPlayerActivity(Context context, VideoInfo videoInfo, int time) {
+        Intent intent = new Intent(context, PlayerActivity.class);
+        intent.putExtra("video", videoInfo);
+        intent.putExtra("time", time);
+        if (!(context instanceof Activity)) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+        context.startActivity(intent);
+    }
 }

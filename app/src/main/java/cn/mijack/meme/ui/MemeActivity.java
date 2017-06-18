@@ -32,6 +32,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.qiniu.android.common.AutoZone;
 import com.qiniu.android.storage.Configuration;
 import com.qiniu.android.storage.UpProgressHandler;
@@ -205,10 +206,12 @@ public class MemeActivity extends BaseActivity {
     }
 
     UploadDialog uploadDialog;
+    Gson gson = new Gson();
 
     @NonNull
     private void uploadToQiniu() {
-        memeViewModel.requestToken(UserManager.get(this).getUser().getUid(), videoInfo.tId, progess,videoInfo.title,videoInfo.shortTitle)
+        memeViewModel.requestToken(UserManager.get(this).getUser().getUid(), videoInfo.tId, progess,videoInfo.title,
+                videoInfo.shortTitle, videoInfo)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnNext(token -> {

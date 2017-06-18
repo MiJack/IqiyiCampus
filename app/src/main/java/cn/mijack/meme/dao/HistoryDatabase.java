@@ -9,7 +9,7 @@ import cn.mijack.meme.model.HistoryEntity;
  * @author admin
  * @date 2017/6/16
  */
-@Database(entities = {HistoryEntity.class},version = 2,exportSchema = false)
+@Database(entities = {HistoryEntity.class}, version = 3, exportSchema = false)
 public abstract class HistoryDatabase extends RoomDatabase {
     public abstract HistoryDao historyDao();
 

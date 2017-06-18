@@ -6,12 +6,16 @@ import java.util.List;
 import java.util.Map;
 
 import cn.mijack.meme.model.Emoji;
+import cn.mijack.meme.model.MemeEntity;
 import cn.mijack.meme.model.TokenEntity;
+import cn.mijack.meme.model.VideoInfo;
 import cn.mijack.meme.user.User;
 import io.reactivex.Observable;
+import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
@@ -39,12 +43,22 @@ public interface ApiService {
     @GET(SERVER + "/listEmoji")
     LiveData<ApiResponse<Result<List<Emoji>>>> listEmoji();
 
-    @GET(SERVER + "/requestQiniuToken")
+    @POST(SERVER + "/requestQiniuToken")
 //    http://develop.mijack.cn:8080/requestQiniuToken?uid=12&videoId=12&startTime=1212
     Observable<Result<TokenEntity>> requestToken(
             @Query("uid") int uid, @Query("videoId") String vId,
             @Query("startTime") long progess,
             @Query("title") String title,
-            @Query("shortTitle") String shortTitle);
+            @Query("shortTitle") String shortTitle,
+            @Body VideoInfo videoInfo);
+
+    @GET(SERVER + "/listFiles")
+    LiveData<ApiResponse<Result<List<MemeEntity>>>> listMemes();
+
+    @GET(SERVER + "/listFiles")
+    LiveData<ApiResponse<Result<List<MemeEntity>>>> listMyMemes(@Query("uid") int uid);
+
+    @GET(SERVER + "/listFiles")
+    LiveData<ApiResponse<Result<List<MemeEntity>>>> listMemes(@Query("videoId") int videoId);
 }
 

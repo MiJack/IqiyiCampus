@@ -8,7 +8,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.util.Util;
+import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,6 +17,9 @@ import java.util.List;
 
 import cn.mijack.meme.R;
 import cn.mijack.meme.model.HistoryEntity;
+import cn.mijack.meme.model.VideoInfo;
+import cn.mijack.meme.utils.QYPlayerUtils;
+import cn.mijack.meme.utils.StringUtils;
 import cn.mijack.meme.utils.Utils;
 
 /**
@@ -25,6 +28,7 @@ import cn.mijack.meme.utils.Utils;
  */
 public class HistoryAdapter extends RecyclerView.Adapter {
     private List<HistoryEntity> data = new ArrayList<>();
+    Gson gson = new Gson();
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
@@ -47,9 +51,12 @@ public class HistoryAdapter extends RecyclerView.Adapter {
         videoTitle.setText(historyEntity.getTitle());
         videoProgress.setProgress((int) (historyEntity.getProgress() * 100 / historyEntity.getDuration()));
         tvVideoPlayStatue.setText(Utils.formatTime(historyEntity.getProgress()) + "/" + Utils.formatTime(historyEntity.getDuration()));
-        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-        tvVideoPlayTime.setText(timeFormat.format(new Date(historyEntity.getUpdateTime())));
+        tvVideoPlayTime.setText(StringUtils.getDataUtil(System.currentTimeMillis(), historyEntity.getUpdateTime()));
         Glide.with(viewHolder.itemView.getContext()).load(historyEntity.getImg()).into(videoImage);
+        viewHolder.itemView.setOnClickListener(v -> {
+            VideoInfo videoInfo = gson.fromJson(historyEntity.getVideoInfo(), VideoInfo.class);
+            QYPlayerUtils.jumpToPlayerActivity(v.getContext(), videoInfo, historyEntity.getProgress());
+        });
     }
 
     @Override

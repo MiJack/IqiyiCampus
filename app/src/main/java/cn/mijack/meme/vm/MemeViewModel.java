@@ -7,6 +7,7 @@ import java.util.List;
 
 import cn.mijack.meme.model.Emoji;
 import cn.mijack.meme.model.TokenEntity;
+import cn.mijack.meme.model.VideoInfo;
 import cn.mijack.meme.remote.ApiResponse;
 import cn.mijack.meme.remote.Result;
 import io.reactivex.Observable;
@@ -39,7 +40,7 @@ public class MemeViewModel extends BaseViewModel {
         return emojiUrlLiveData;
     }
 
-    public Observable<Result<TokenEntity>> requestToken(int uid, String vId, long progess, String title, String shortTitle) {
-        return getApiService().requestToken(uid,vId,progess,title,shortTitle);
+    public Observable<Result<TokenEntity>> requestToken(int uid, String vId, long progess, String title, String shortTitle,VideoInfo videoInfo) {
+        return getApiService().requestToken(uid,vId,progess,title,shortTitle,videoInfo);
     }
 }

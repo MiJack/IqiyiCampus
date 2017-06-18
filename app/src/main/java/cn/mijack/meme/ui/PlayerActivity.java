@@ -42,6 +42,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.util.Util;
+import com.google.gson.Gson;
 import com.iqiyi.player.nativemediaplayer.MediaPlayerState;
 import com.qiyi.video.playcore.ErrorCode;
 import com.qiyi.video.playcore.IQYPlayerHandlerCallBack;
@@ -148,8 +149,6 @@ public class PlayerActivity extends BaseActivity {
     private MediaProjectionManager mMediaProjectionManager;
     private MediaProjection mediaProjection;
     private ImageReader mImageReader;
-    private String mImageName;
-    private Bitmap mBitmap;
     private ImageView mPlayPauseView;
     private ImageView mMemeButton;
     private LinearLayout controlBack;
@@ -203,7 +202,7 @@ public class PlayerActivity extends BaseActivity {
         mMediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         getContentResolver().registerContentObserver(Settings.System.getUriFor(Settings.System.ACCELEROMETER_ROTATION),
                 true, rotationObserver);
-        videoInfo = (VideoInfo) intent.getSerializableExtra("video");
+        currentPosition =  intent.getIntExtra("time", -1);
         setContentView(R.layout.activity_player_portrait);
         mVideoView = (MemeVideoView) findViewById(R.id.id_videoview);
         mMemeButton = (ImageView) findViewById(R.id.idMeme);
@@ -397,7 +396,7 @@ public class PlayerActivity extends BaseActivity {
         LogUtils.d(TAG, "HANDLER_MSG_UPDATE_PROGRESS, duration = " + duration + ", currentPosition = " + progress);
         if (duration > 0) {
             HistoryEntity entity = new HistoryEntity(videoInfo.id, videoInfo.title, videoInfo.img, videoInfo.aId, videoInfo.tId,
-                    System.currentTimeMillis(), progress, duration);
+                    System.currentTimeMillis(), progress, duration,new Gson().toJson(videoInfo));
             db.historyDao().insertHistory(entity);
         }
         if (duration > 0) {
@@ -433,8 +432,8 @@ public class PlayerActivity extends BaseActivity {
 //                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
 //            }
 //        } else {
-            //todo fix bug 未授权前的请求
-            captureImage();
+        //todo fix bug 未授权前的请求
+        captureImage();
 //        }
     }
 
@@ -535,8 +534,8 @@ public class PlayerActivity extends BaseActivity {
             }
             Intent intent = new Intent(this, MemeActivity.class);
             intent.putExtra("image", png);
-            intent.putExtra("videoInfo",videoInfo);
-            intent.putExtra("progress",mVideoView.getCurrentPosition());
+            intent.putExtra("videoInfo", videoInfo);
+            intent.putExtra("progress", mVideoView.getCurrentPosition());
             startActivityForResult(intent, REQUEST_CODE_UPLOAD_MEME);
             image.close();
         }).start();
@@ -577,7 +576,8 @@ public class PlayerActivity extends BaseActivity {
             WindowManager.LayoutParams attrs = getWindow().getAttributes();
             try {
                 mVideoView.setVideoViewSize(screenWidth, (int) (screenWidth * 9.0 / 16));
-            }catch (Exception e){}
+            } catch (Exception e) {
+            }
             attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow().setAttributes(attrs);
             recyclerView.setVisibility(View.VISIBLE);

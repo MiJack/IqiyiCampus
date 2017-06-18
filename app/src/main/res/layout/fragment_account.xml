@@ -15,14 +15,14 @@
             android:id="@+id/userAvatar"
             android:layout_width="64dp"
             android:layout_height="64dp"
+            android:src="@drawable/circle_dot_focus"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/circle_dot_focus" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/userLogin"
-            android:layout_width="wrap_content"
             style="@style/TextAppearance.AppCompat.Title"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
             android:text="登录/注册"
@@ -44,14 +44,14 @@
 
         <TextView
             android:id="@+id/tvUserEmail"
-            android:layout_marginLeft="16dp"
             style="@style/TextAppearance.AppCompat.Body1"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:text="UserEmail"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@id/userLogin"
-            app:layout_constraintTop_toBottomOf="@id/tvUserName"
-            android:layout_height="wrap_content"
-            android:text="UserEmail" />
+            app:layout_constraintTop_toBottomOf="@id/tvUserName" />
 
 
     </android.support.constraint.ConstraintLayout>
@@ -85,6 +85,7 @@
         android:id="@+id/btnLogout"
         style="@style/TextAppearance.AppCompat.Subhead.Button"
         android:text="注销" />
+
     <View
         android:layout_width="fill_parent"
         android:layout_height="0dp"

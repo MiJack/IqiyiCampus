@@ -26,13 +26,14 @@ public class HistoryEntity {
 
     private long updateTime;
 
-    private long progress;
-    private long duration;
+    private int progress;
+    private int duration;
+    private String videoInfo;
 
     public HistoryEntity() {
     }
 
-    public HistoryEntity(String videoId, String title, String img, String aId, String tId, long updateTime, long progress, long duration) {
+    public HistoryEntity(String videoId, String title, String img, String aId, String tId, long updateTime, int progress, int duration, String videoInfo) {
         this.vId = videoId;
         this.title = title;
         this.img = img;
@@ -41,6 +42,7 @@ public class HistoryEntity {
         this.updateTime = updateTime;
         this.progress = progress;
         this.duration = duration;
+        this.videoInfo = videoInfo;
     }
 
 
@@ -92,19 +94,27 @@ public class HistoryEntity {
         this.updateTime = updateTime;
     }
 
-    public long getProgress() {
+    public int getProgress() {
         return progress;
     }
 
-    public void setProgress(long progress) {
+    public void setProgress(int progress) {
         this.progress = progress;
     }
 
-    public long getDuration() {
+    public int getDuration() {
         return duration;
     }
 
-    public void setDuration(long duration) {
+    public void setDuration(int duration) {
         this.duration = duration;
+    }
+
+    public String getVideoInfo() {
+        return videoInfo;
+    }
+
+    public void setVideoInfo(String videoInfo) {
+        this.videoInfo = videoInfo;
     }
 }
