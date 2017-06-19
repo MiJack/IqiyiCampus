@@ -47,6 +47,11 @@ Meme这个词最初源自英国著名科学家理查德•道金斯（Richard Da
 我们还提供了丰富的Emoji表情。
 ![](images/emojis.png)
 
+## 相关测试账号
+
+用户名：Mi&Jack
+邮箱：abc@abc.com 
+密码： 111111
 
 ## SDK版本说明
 
