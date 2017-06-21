@@ -81,18 +81,7 @@ public class MemeActivity extends BaseActivity {
     VideoInfo videoInfo;
     private int progess;
     private MemeViewModel memeViewModel;
-    private EmojiPageAdapter emojiPageAdapter;
     private DrawerLayout drawerLayout;
-    private Observer<ApiResponse<Result<List<Emoji>>>> dataObserver = emojiResult -> {
-        if (emojiResult == null) {
-            Toast.makeText(this, R.string.error, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        List<Emoji> data = emojiResult.body.getData();
-//        emojiAdapter.setData(data);
-        emojiPageAdapter.setEmojis(data);
-    };
-    private ViewPager viewPager;
     private MemeView memeView;
     Observer<String> emojiObserver = url -> {
         if (TextUtils.isEmpty(url)) {
@@ -112,7 +101,7 @@ public class MemeActivity extends BaseActivity {
 
         setContentView(R.layout.activity_meme);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        viewPager = (ViewPager) findViewById(R.id.viewPager);
+//        viewPager = (ViewPager) findViewById(R.id.viewPager);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -127,16 +116,6 @@ public class MemeActivity extends BaseActivity {
         memeView = (MemeView) findViewById(R.id.memeView);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         progess = intent.getIntExtra("progress", -1);
-        emojiPageAdapter = new EmojiPageAdapter(getSupportFragmentManager());
-        viewPager.setAdapter(emojiPageAdapter);
-        CircleIndicator indicator = (CircleIndicator) findViewById(R.id.indicator);
-        indicator.setViewPager(viewPager);
-        emojiPageAdapter.registerDataSetObserver(indicator.getDataSetObserver());
-        final ViewPager.LayoutParams layoutParams = new ViewPager.LayoutParams();
-        layoutParams.width = ViewPager.LayoutParams.MATCH_PARENT;
-        layoutParams.height = ViewPager.LayoutParams.WRAP_CONTENT;
-        layoutParams.gravity = Gravity.BOTTOM;
-        memeViewModel.loadEmoji().observe(this, dataObserver);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.RIGHT);
         memeViewModel.getEmojiUrlLiveData().observe(this, emojiObserver);
         String bitmap = intent.getStringExtra("image");

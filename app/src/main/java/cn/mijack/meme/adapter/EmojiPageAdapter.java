@@ -17,6 +17,7 @@ import java.util.List;
 
 import cn.mijack.meme.R;
 import cn.mijack.meme.base.BaseFragment;
+import cn.mijack.meme.fragment.EmptyEmojiFragment;
 import cn.mijack.meme.model.Emoji;
 import cn.mijack.meme.view.NoScrollGridLayoutManager;
 
@@ -50,18 +51,19 @@ public class EmojiPageAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public int getCount() {
-        if (emojis == null) {
-            return 0;
-        }
         int i = emojis.size() % SIZE_PER_PAGE;
         int count = emojis.size() / SIZE_PER_PAGE;
         return i == 0 ? count : (count + 1);
     }
 
-    public void setEmojis(List<Emoji> emojis) {
-        this.emojis.clear();
-        this.emojis.addAll(emojis);
-        int pageCount = getCount();
+    public void setEmojis(List<Emoji> list) {
+        emojis.clear();
+        if (list != null) {
+            emojis.addAll(list);
+        }
+        int size = emojis.size() % SIZE_PER_PAGE;
+        int count = emojis.size() / SIZE_PER_PAGE;
+        int pageCount = size == 0 ? count : (count + 1);
         dataArray.clear();
         int emojiSize = emojis.size();
         Log.d(TAG, "setEmojis: " + pageCount);

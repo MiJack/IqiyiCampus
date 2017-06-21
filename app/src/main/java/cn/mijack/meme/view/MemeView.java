@@ -67,14 +67,14 @@ public class MemeView extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        Log.d(TAG, String.format("onLayout: l:%s,t:%s,r:%s,b:%s", l, t, r, b));
+//        Log.d(TAG, String.format("onLayout: l:%s,t:%s,r:%s,b:%s", l, t, r, b));
         captureView.layout(0, 0, getMeasuredWidth(), getMeasuredHeight());
         layoutChild(title);
         layoutChild(emojiView);
         LayoutParams lp = (LayoutParams) emojiView.getLayoutParams();
-        Log.d(TAG, String.format("emojiView: l:%s,t:%s,r:%s,b:%s",
-                lp.centerX - emojiView.getMeasuredWidth() / 2, lp.centerY - emojiView.getMeasuredHeight() / 2,
-                lp.centerX + emojiView.getMeasuredWidth() / 2, lp.centerY + emojiView.getMeasuredHeight() / 2));
+//        Log.d(TAG, String.format("emojiView: l:%s,t:%s,r:%s,b:%s",
+//                lp.centerX - emojiView.getMeasuredWidth() / 2, lp.centerY - emojiView.getMeasuredHeight() / 2,
+//                lp.centerX + emojiView.getMeasuredWidth() / 2, lp.centerY + emojiView.getMeasuredHeight() / 2));
 
     }
 

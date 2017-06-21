@@ -97,7 +97,7 @@
 
     <TextView
         android:id="@+id/msg"
-        android:text="正在截图，请耐心等待"
+        android:text="@string/msg_capture"
         android:textColor="#fff"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="@id/idBack"

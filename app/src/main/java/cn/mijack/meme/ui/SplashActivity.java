@@ -29,7 +29,7 @@ public class SplashActivity extends BaseActivity {
             Intent intent = new Intent(SplashActivity.this, MainActivity.class);
 //            //myscreen_20170617001109.png
 //            Intent intent = new Intent(this, MemeActivity.class);
-//            intent.putExtra("image", "myscreen_20170617235729.png");
+//            intent.putExtra("image", "myscreen_20170621203614.png");
             startActivity(intent);
             finish();
         }, 2000);

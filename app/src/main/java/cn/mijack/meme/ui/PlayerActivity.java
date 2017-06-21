@@ -13,6 +13,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.media.Image;
 import android.media.ImageReader;
@@ -203,6 +204,7 @@ public class PlayerActivity extends BaseActivity {
                     mVideoView.seekTo(progress);
                 }
             };
+    private TextView msg;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -277,6 +279,7 @@ public class PlayerActivity extends BaseActivity {
         //请求
         mMemeButton.setOnClickListener(v -> {
             pauseVideo();
+            msg.setText(R.string.msg_capture);
             AutoTransition sDefaultTransition = new AutoTransition();
 
             sDefaultTransition.addListener(new Transition.TransitionListener() {
@@ -287,13 +290,14 @@ public class PlayerActivity extends BaseActivity {
 
                 @Override
                 public void onTransitionEnd(@NonNull Transition transition) {
-                    mMainHandler.postDelayed(() -> capture(), 300);
+                    mMainHandler.postDelayed(() -> capture(), 1000);
                     Log.d(TAG, "onTransitionEnd: ");
                 }
 
                 @Override
                 public void onTransitionCancel(@NonNull Transition transition) {
                     Log.d(TAG, "onTransitionCancel: ");
+                    startVideo();
                 }
 
                 @Override
@@ -319,6 +323,7 @@ public class PlayerActivity extends BaseActivity {
         });
 
         mSeekBar = (SeekBar) findViewById(R.id.id_progress);
+        msg = (TextView) findViewById(R.id.msg);
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             private int mProgress = 0;
 
@@ -452,12 +457,12 @@ public class PlayerActivity extends BaseActivity {
     }
 
     private void captureImage() {
-        if (mImageReader == null) {
-            startActivityForResult(mMediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
-        } else {
+//        if (mImageReader == null) {
+        startActivityForResult(mMediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
+//        } else {
 //            mImageReader.close();
-            handlerImage(mImageReader.acquireLatestImage());
-        }
+//            handlerImage(mImageReader.acquireNextImage());
+//        }
     }
 
     @Override
@@ -500,12 +505,14 @@ public class PlayerActivity extends BaseActivity {
                 int width = metric.widthPixels;
                 int height = metric.heightPixels;
                 final Image.Plane[] planes = image.getPlanes();
+                Rect rect = image.getCropRect();
                 final ByteBuffer buffer = planes[0].getBuffer();
                 int pixelStride = planes[0].getPixelStride();
                 int rowStride = planes[0].getRowStride();
                 int rowPadding = rowStride - pixelStride * width;
                 Bitmap mBitmap = Bitmap.createBitmap(width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888);
                 mBitmap.copyPixelsFromBuffer(buffer);
+                mBitmap = Bitmap.createBitmap(mBitmap, rect.left, rect.top, rect.width(), rect.height());
                 Bitmap bitmap = Bitmap.createBitmap(mVideoView.getWidth(), mVideoView.getHeight(), Bitmap.Config.ARGB_8888);
                 int[] location = new int[2];
                 mVideoView.getLocationOnScreen(location);
@@ -522,18 +529,15 @@ public class PlayerActivity extends BaseActivity {
                 System.out.println("ok");
                 DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
                 String png = "myscreen_" + dateFormat.format(new Date(System.currentTimeMillis())) + ".png";
-                try {
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, this.openFileOutput(png, Context.MODE_PRIVATE));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, this.openFileOutput(png, Context.MODE_PRIVATE));
+                runOnUiThread(() -> msg.setText(R.string.msg_generate));
                 Intent intent = new Intent(this, MemeActivity.class);
                 intent.putExtra("image", png);
                 intent.putExtra("videoInfo", videoInfo);
                 intent.putExtra("progress", mVideoView.getCurrentPosition());
                 startActivityForResult(intent, REQUEST_CODE_UPLOAD_MEME);
                 image.close();
-                currentPosition=mVideoView.getCurrentPosition();
+                currentPosition = mVideoView.getCurrentPosition();
             } catch (Exception e) {
                 e.printStackTrace();
                 runOnUiThread(() -> {

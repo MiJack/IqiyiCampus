@@ -123,4 +123,6 @@
     <string name="my_meme">我上传的Meme</string>
     <string name="login_register">登录/注册</string>
     <string name="video_history">看过的视频</string>
+    <string name="msg_capture">正在截图，请耐心等待</string>
+    <string name="msg_generate">正在生成截图文件，请耐心等待</string>
 </resources>

@@ -11,6 +11,9 @@ import cn.mijack.meme.model.VideoInfo;
 import cn.mijack.meme.remote.ApiResponse;
 import cn.mijack.meme.remote.Result;
 import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * @author admin
@@ -18,17 +21,17 @@ import io.reactivex.Observable;
  */
 
 public class MemeViewModel extends BaseViewModel {
-    LiveData<ApiResponse<Result<List<Emoji>>>> emojiLiveData;
-    private MutableLiveData<String> emojiUrlLiveData;
+    MutableLiveData<Result<List<Emoji>>> emojiLiveData = new MutableLiveData<>();
+    private MutableLiveData<String> emojiUrlLiveData = new MutableLiveData<>();
 
     public MemeViewModel() {
-        emojiUrlLiveData = new MutableLiveData<>();
     }
 
-    public LiveData<ApiResponse<Result<List<Emoji>>>> loadEmoji() {
-        if (emojiLiveData == null) {
-            emojiLiveData = getApiService().listEmoji();
-        }
+    public LiveData<Result<List<Emoji>>> loadEmoji() {
+        getApiService().listEmoji()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(listResult -> emojiLiveData.setValue(listResult));
         return emojiLiveData;
     }
 
@@ -40,7 +43,7 @@ public class MemeViewModel extends BaseViewModel {
         return emojiUrlLiveData;
     }
 
-    public Observable<Result<TokenEntity>> requestToken(int uid, String vId, long progess, String title, String shortTitle,VideoInfo videoInfo) {
-        return getApiService().requestToken(uid,vId,progess,title,shortTitle,videoInfo);
+    public Observable<Result<TokenEntity>> requestToken(int uid, String vId, long progess, String title, String shortTitle, VideoInfo videoInfo) {
+        return getApiService().requestToken(uid, vId, progess, title, shortTitle, videoInfo);
     }
 }

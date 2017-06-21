@@ -41,7 +41,7 @@ public interface ApiService {
                                       @Field("password") String password);
 
     @GET(SERVER + "/listEmoji")
-    LiveData<ApiResponse<Result<List<Emoji>>>> listEmoji();
+    Observable<Result<List<Emoji>>> listEmoji();
 
     @POST(SERVER + "/requestQiniuToken")
 //    http://develop.mijack.cn:8080/requestQiniuToken?uid=12&videoId=12&startTime=1212
